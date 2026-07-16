@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# AWS EOL Monitor — Backend .gitignore
+# Python 3.10+ / Lambda
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Python bytecode ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env_python/
+Pipfile.lock
+
+# ── Environment variables ─────────────────────────────────────────────────────
+# .env.example   → COMMIT   (safe reference, no real values)
+# .env           → IGNORE   (real env with secrets/ARNs)
+
+# ── Test / coverage ───────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+nosetests.xml
+test-results/
+
+# ── Local data (file storage backend) ────────────────────────────────────────
+# /tmp/eol-data/ is outside the repo; if you point EOL_DATA_DIR inside the
+# repo for dev, ignore those files:
+eol-data/
+*.eol.json
+
+# ── Distribution / packaging ──────────────────────────────────────────────────
+*.egg
+*.egg-info/
+dist/
+build/
+wheels/
+.eggs/
+MANIFEST
+
+# ── Lambda deployment package ────────────────────────────────────────────────
+package/
+eol_monitor.zip
+
+# ── Type checking / linting ───────────────────────────────────────────────────
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
+
+# ── Jupyter / IPython ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,18 @@
+{
+  "_comment": "Deploy this trust policy in each member account. Replace MGMT_ACCOUNT_ID and EXTERNAL_ID with actual values.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::MGMT_ACCOUNT_ID:role/EOLCollectorRole"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "sts:ExternalId": "EXTERNAL_ID"
+        }
+      }
+    }
+  ]
+}

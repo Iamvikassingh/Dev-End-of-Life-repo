@@ -1,0 +1,107 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadAWSServices",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:ListFunctions",
+        "eks:ListClusters",
+        "eks:DescribeCluster",
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "elasticache:DescribeCacheClusters",
+        "ec2:DescribeInstances",
+        "ec2:DescribeImages",
+        "ec2:DescribeRegions",
+        "ssm:DescribeInstanceInformation",
+        "ssm:GetInventory",
+        "codebuild:ListProjects",
+        "codebuild:BatchGetProjects",
+        "elasticbeanstalk:DescribeEnvironments",
+        "elasticbeanstalk:DescribePlatformVersion",
+        "elasticmapreduce:ListClusters",
+        "elasticmapreduce:DescribeCluster",
+        "kafka:ListClustersV2",
+        "kafka:ListClusters",
+        "kafka:DescribeClusterV2",
+        "kafka:DescribeCluster",
+        "es:ListDomainNames",
+        "es:DescribeDomain",
+        "es:DescribeDomains",
+        "es:DescribeElasticsearchDomains",
+        "opensearch:ListDomainNames",
+        "opensearch:DescribeDomain",
+        "opensearch:DescribeDomains",
+        "docdb:DescribeDBClusters",
+        "neptune:DescribeDBClusters",
+        "glue:ListJobs",
+        "glue:GetJobs",
+        "glue:GetJob",
+        "cloudfront:ListFunctions",
+        "cloudfront:DescribeFunction",
+        "ecr:DescribeRepositories",
+        "ecr:DescribeImages",
+        "ecr:BatchGetImage"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DynamoDBReadWrite",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:*:*:table/aws-eol-inventory",
+        "arn:aws:dynamodb:*:*:table/aws-eol-inventory/index/*",
+        "arn:aws:dynamodb:*:*:table/aws-eol-config",
+        "arn:aws:dynamodb:*:*:table/aws-eol-alert-dedup"
+      ]
+    },
+    {
+      "Sid": "SNSPublish",
+      "Effect": "Allow",
+      "Action": ["sns:Publish"],
+      "Resource": "arn:aws:sns:*:*:eol-alerts"
+    },
+    {
+      "Sid": "LambdaInvokeSelf",
+      "Effect": "Allow",
+      "Action": ["lambda:InvokeFunction"],
+      "Resource": "arn:aws:lambda:*:*:function:aws-eol-collector"
+    },
+    {
+      "Sid": "AssumeMemberRoles",
+      "Effect": "Allow",
+      "Action": ["sts:AssumeRole"],
+      "Resource": "arn:aws:iam::*:role/EOLMonitorReadOnly"
+    },
+    {
+      "Sid": "OrganizationsListAccounts",
+      "Effect": "Allow",
+      "Action": ["organizations:ListAccounts"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "GetCallerIdentity",
+      "Effect": "Allow",
+      "Action": ["sts:GetCallerIdentity"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/aws-eol-*"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "_comment": "Attach this PERMISSIONS policy to the EOLMonitorReadOnly role in each member account. Pair with member-account-role.json (trust policy). Replace MGMT_ACCOUNT_ID with your management account.",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EOLReadOnlyServices",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:ListFunctions",
+        "eks:ListClusters",
+        "eks:DescribeCluster",
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "elasticache:DescribeCacheClusters",
+        "elasticache:DescribeReplicationGroups",
+        "ec2:DescribeInstances",
+        "ec2:DescribeImages",
+        "ec2:DescribeRegions",
+        "ssm:DescribeInstanceInformation",
+        "ssm:GetInventory",
+        "codebuild:ListProjects",
+        "codebuild:BatchGetProjects",
+        "elasticbeanstalk:DescribeEnvironments",
+        "elasticbeanstalk:DescribePlatformVersion",
+        "elasticmapreduce:ListClusters",
+        "elasticmapreduce:DescribeCluster",
+        "kafka:ListClustersV2",
+        "kafka:ListClusters",
+        "kafka:DescribeClusterV2",
+        "kafka:DescribeCluster",
+        "es:ListDomainNames",
+        "es:DescribeElasticsearchDomain",
+        "opensearch:ListDomainNames",
+        "opensearch:DescribeDomain",
+        "docdb:DescribeDBClusters",
+        "neptune:DescribeDBClusters",
+        "glue:ListJobs",
+        "glue:GetJobs",
+        "glue:GetJob",
+        "cloudfront:ListFunctions",
+        "cloudfront:DescribeFunction",
+        "ecr:DescribeRepositories",
+        "ecr:DescribeImages",
+        "ecr:BatchGetImage"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EOLCallerIdentity",
+      "Effect": "Allow",
+      "Action": ["sts:GetCallerIdentity"],
+      "Resource": "*"
+    }
+  ]
+}

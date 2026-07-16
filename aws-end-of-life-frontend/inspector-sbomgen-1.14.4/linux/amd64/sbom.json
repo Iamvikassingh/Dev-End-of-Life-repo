@@ -1,0 +1,1317 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:9f1d735d-6cb1-4d76-a08d-6a5eba5c7325",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-07-13T14:39:08Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "author": "Amazon Web Services, Inc. (AWS)",
+          "name": "inspector-sbomgen",
+          "version": "1.14.4",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "de4fbdabdc53cdf1b3ed495102dcacc7ad89adb1cf978debd7666ef849ac4e92"
+            }
+          ],
+          "properties": [
+            {
+              "name": "amazon:inspector:sbom_generator:resource_type",
+              "value": "binary"
+            }
+          ]
+        }
+      ]
+    },
+    "component": {
+      "bom-ref": "comp-1",
+      "type": "file",
+      "name": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "comp-2",
+      "type": "application",
+      "name": "inspector-sbomgen",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9fc7c816e85b29929441c632a36fbcae1b381eeed7a7b9af792ba9000ed7eabe"
+        }
+      ],
+      "purl": "pkg:generic/inspector-sbomgen?go_toolchain=1.25.12",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-3",
+      "type": "library",
+      "name": "github.com/BurntSushi/toml",
+      "version": "v1.6.0",
+      "purl": "pkg:golang/github.com/BurntSushi/toml@v1.6.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-4",
+      "type": "library",
+      "name": "github.com/CycloneDX/cyclonedx-go",
+      "version": "v0.9.3",
+      "purl": "pkg:golang/github.com/CycloneDX/cyclonedx-go@v0.9.3",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-5",
+      "type": "library",
+      "name": "github.com/Masterminds/semver/v3",
+      "version": "v3.4.0",
+      "purl": "pkg:golang/github.com/Masterminds/semver/v3@v3.4.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-6",
+      "type": "library",
+      "name": "github.com/akamensky/argparse",
+      "version": "v1.4.0",
+      "purl": "pkg:golang/github.com/akamensky/argparse@v1.4.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-7",
+      "type": "library",
+      "name": "github.com/asaskevich/EventBus",
+      "version": "v0.0.0-20200907212545-49d423059eef",
+      "purl": "pkg:golang/github.com/asaskevich/EventBus@v0.0.0-20200907212545-49d423059eef",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-8",
+      "type": "library",
+      "name": "github.com/aws/amazon-inspector-sbom-generator",
+      "version": "(devel)",
+      "purl": "pkg:golang/github.com/aws/amazon-inspector-sbom-generator@%28devel%29",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-9",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2",
+      "version": "v1.41.1",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2@v1.41.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-10",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/config",
+      "version": "v1.32.7",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/config@v1.32.7",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-11",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/credentials",
+      "version": "v1.19.7",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/credentials@v1.19.7",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-12",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/feature/ec2/imds",
+      "version": "v1.18.17",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/feature/ec2/imds@v1.18.17",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-13",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/internal/configsources",
+      "version": "v1.4.17",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/internal/configsources@v1.4.17",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-14",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/internal/endpoints/v2",
+      "version": "v2.7.17",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/internal/endpoints/v2@v2.7.17",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-15",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/internal/ini",
+      "version": "v1.8.4",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/internal/ini@v1.8.4",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-16",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/inspectorscan",
+      "version": "v1.13.1",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/inspectorscan@v1.13.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-17",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding",
+      "version": "v1.13.4",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding@v1.13.4",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-18",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/internal/presigned-url",
+      "version": "v1.13.17",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/internal/presigned-url@v1.13.17",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-19",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/signin",
+      "version": "v1.0.5",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/signin@v1.0.5",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-20",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/sso",
+      "version": "v1.30.9",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/sso@v1.30.9",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-21",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/ssooidc",
+      "version": "v1.35.13",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/ssooidc@v1.35.13",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-22",
+      "type": "library",
+      "name": "github.com/aws/aws-sdk-go-v2/service/sts",
+      "version": "v1.41.6",
+      "purl": "pkg:golang/github.com/aws/aws-sdk-go-v2/service/sts@v1.41.6",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-23",
+      "type": "library",
+      "name": "github.com/aws/smithy-go",
+      "version": "v1.24.0",
+      "purl": "pkg:golang/github.com/aws/smithy-go@v1.24.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-24",
+      "type": "library",
+      "name": "github.com/blang/semver/v4",
+      "version": "v4.0.0",
+      "purl": "pkg:golang/github.com/blang/semver/v4@v4.0.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-25",
+      "type": "library",
+      "name": "github.com/cespare/xxhash/v2",
+      "version": "v2.3.0",
+      "purl": "pkg:golang/github.com/cespare/xxhash/v2@v2.3.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-26",
+      "type": "library",
+      "name": "github.com/clipperhouse/displaywidth",
+      "version": "v0.7.0",
+      "purl": "pkg:golang/github.com/clipperhouse/displaywidth@v0.7.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-27",
+      "type": "library",
+      "name": "github.com/clipperhouse/stringish",
+      "version": "v0.1.1",
+      "purl": "pkg:golang/github.com/clipperhouse/stringish@v0.1.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-28",
+      "type": "library",
+      "name": "github.com/clipperhouse/uax29/v2",
+      "version": "v2.4.0",
+      "purl": "pkg:golang/github.com/clipperhouse/uax29/v2@v2.4.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-29",
+      "type": "library",
+      "name": "github.com/containerd/errdefs",
+      "version": "v1.0.0",
+      "purl": "pkg:golang/github.com/containerd/errdefs@v1.0.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-30",
+      "type": "library",
+      "name": "github.com/containerd/errdefs/pkg",
+      "version": "v0.3.0",
+      "purl": "pkg:golang/github.com/containerd/errdefs/pkg@v0.3.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-31",
+      "type": "library",
+      "name": "github.com/containerd/stargz-snapshotter/estargz",
+      "version": "v0.18.2",
+      "purl": "pkg:golang/github.com/containerd/stargz-snapshotter/estargz@v0.18.2",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-32",
+      "type": "library",
+      "name": "github.com/containerd/typeurl/v2",
+      "version": "v2.2.3",
+      "purl": "pkg:golang/github.com/containerd/typeurl/v2@v2.2.3",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-33",
+      "type": "library",
+      "name": "github.com/davecgh/go-spew",
+      "version": "v1.1.2-0.20180830191138-d8f796af33cc",
+      "purl": "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-34",
+      "type": "library",
+      "name": "github.com/distribution/reference",
+      "version": "v0.6.0",
+      "purl": "pkg:golang/github.com/distribution/reference@v0.6.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-35",
+      "type": "library",
+      "name": "github.com/docker/cli",
+      "version": "v29.3.0+incompatible",
+      "purl": "pkg:golang/github.com/docker/cli@v29.3.0%2Bincompatible",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-36",
+      "type": "library",
+      "name": "github.com/docker/distribution",
+      "version": "v2.8.3+incompatible",
+      "purl": "pkg:golang/github.com/docker/distribution@v2.8.3%2Bincompatible",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-37",
+      "type": "library",
+      "name": "github.com/docker/docker-credential-helpers",
+      "version": "v0.9.5",
+      "purl": "pkg:golang/github.com/docker/docker-credential-helpers@v0.9.5",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-38",
+      "type": "library",
+      "name": "github.com/docker/go-connections",
+      "version": "v0.6.0",
+      "purl": "pkg:golang/github.com/docker/go-connections@v0.6.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-39",
+      "type": "library",
+      "name": "github.com/docker/go-units",
+      "version": "v0.5.0",
+      "purl": "pkg:golang/github.com/docker/go-units@v0.5.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-40",
+      "type": "library",
+      "name": "github.com/dustin/go-humanize",
+      "version": "v1.0.1",
+      "purl": "pkg:golang/github.com/dustin/go-humanize@v1.0.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-41",
+      "type": "library",
+      "name": "github.com/fatih/color",
+      "version": "v1.18.0",
+      "purl": "pkg:golang/github.com/fatih/color@v1.18.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-42",
+      "type": "library",
+      "name": "github.com/felixge/httpsnoop",
+      "version": "v1.0.4",
+      "purl": "pkg:golang/github.com/felixge/httpsnoop@v1.0.4",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-43",
+      "type": "library",
+      "name": "github.com/gabriel-vasile/mimetype",
+      "version": "v1.4.12",
+      "purl": "pkg:golang/github.com/gabriel-vasile/mimetype@v1.4.12",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-44",
+      "type": "library",
+      "name": "github.com/glebarez/go-sqlite",
+      "version": "v1.22.0",
+      "purl": "pkg:golang/github.com/glebarez/go-sqlite@v1.22.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-45",
+      "type": "library",
+      "name": "github.com/go-logr/logr",
+      "version": "v1.4.3",
+      "purl": "pkg:golang/github.com/go-logr/logr@v1.4.3",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-46",
+      "type": "library",
+      "name": "github.com/go-logr/stdr",
+      "version": "v1.2.2",
+      "purl": "pkg:golang/github.com/go-logr/stdr@v1.2.2",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-47",
+      "type": "library",
+      "name": "github.com/goccy/go-yaml",
+      "version": "v1.19.2",
+      "purl": "pkg:golang/github.com/goccy/go-yaml@v1.19.2",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-48",
+      "type": "library",
+      "name": "github.com/gogo/protobuf",
+      "version": "v1.3.2",
+      "purl": "pkg:golang/github.com/gogo/protobuf@v1.3.2",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-49",
+      "type": "library",
+      "name": "github.com/google/go-containerregistry",
+      "version": "v0.21.3",
+      "purl": "pkg:golang/github.com/google/go-containerregistry@v0.21.3",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-50",
+      "type": "library",
+      "name": "github.com/google/licenseclassifier/v2",
+      "version": "v2.0.0",
+      "purl": "pkg:golang/github.com/google/licenseclassifier/v2@v2.0.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-51",
+      "type": "library",
+      "name": "github.com/google/uuid",
+      "version": "v1.6.0",
+      "purl": "pkg:golang/github.com/google/uuid@v1.6.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-52",
+      "type": "library",
+      "name": "github.com/jfrog/go-rpmdb",
+      "version": "v0.0.2",
+      "purl": "pkg:golang/github.com/jfrog/go-rpmdb@v0.0.2",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-53",
+      "type": "library",
+      "name": "github.com/klauspost/compress",
+      "version": "v1.18.4",
+      "purl": "pkg:golang/github.com/klauspost/compress@v1.18.4",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-54",
+      "type": "library",
+      "name": "github.com/mattn/go-colorable",
+      "version": "v0.1.14",
+      "purl": "pkg:golang/github.com/mattn/go-colorable@v0.1.14",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-55",
+      "type": "library",
+      "name": "github.com/mattn/go-isatty",
+      "version": "v0.0.20",
+      "purl": "pkg:golang/github.com/mattn/go-isatty@v0.0.20",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-56",
+      "type": "library",
+      "name": "github.com/mattn/go-runewidth",
+      "version": "v0.0.19",
+      "purl": "pkg:golang/github.com/mattn/go-runewidth@v0.0.19",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-57",
+      "type": "library",
+      "name": "github.com/mitchellh/go-homedir",
+      "version": "v1.1.0",
+      "purl": "pkg:golang/github.com/mitchellh/go-homedir@v1.1.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-58",
+      "type": "library",
+      "name": "github.com/moby/buildkit",
+      "version": "v0.28.1",
+      "purl": "pkg:golang/github.com/moby/buildkit@v0.28.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-59",
+      "type": "library",
+      "name": "github.com/moby/docker-image-spec",
+      "version": "v1.3.1",
+      "purl": "pkg:golang/github.com/moby/docker-image-spec@v1.3.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-60",
+      "type": "library",
+      "name": "github.com/moby/moby/api",
+      "version": "v1.54.0",
+      "purl": "pkg:golang/github.com/moby/moby/api@v1.54.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-61",
+      "type": "library",
+      "name": "github.com/moby/moby/client",
+      "version": "v0.3.0",
+      "purl": "pkg:golang/github.com/moby/moby/client@v0.3.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-62",
+      "type": "library",
+      "name": "github.com/olekukonko/cat",
+      "version": "v0.0.0-20250911104152-50322a0618f6",
+      "purl": "pkg:golang/github.com/olekukonko/cat@v0.0.0-20250911104152-50322a0618f6",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-63",
+      "type": "library",
+      "name": "github.com/olekukonko/errors",
+      "version": "v1.2.0",
+      "purl": "pkg:golang/github.com/olekukonko/errors@v1.2.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-64",
+      "type": "library",
+      "name": "github.com/olekukonko/ll",
+      "version": "v0.1.4-0.20260122041744-2017be7a914c",
+      "purl": "pkg:golang/github.com/olekukonko/ll@v0.1.4-0.20260122041744-2017be7a914c",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-65",
+      "type": "library",
+      "name": "github.com/olekukonko/tablewriter",
+      "version": "v1.1.3",
+      "purl": "pkg:golang/github.com/olekukonko/tablewriter@v1.1.3",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-66",
+      "type": "library",
+      "name": "github.com/opencontainers/go-digest",
+      "version": "v1.0.0",
+      "purl": "pkg:golang/github.com/opencontainers/go-digest@v1.0.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-67",
+      "type": "library",
+      "name": "github.com/opencontainers/image-spec",
+      "version": "v1.1.1",
+      "purl": "pkg:golang/github.com/opencontainers/image-spec@v1.1.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-68",
+      "type": "library",
+      "name": "github.com/package-url/packageurl-go",
+      "version": "v0.1.5",
+      "purl": "pkg:golang/github.com/package-url/packageurl-go@v0.1.5",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-69",
+      "type": "library",
+      "name": "github.com/pkg/errors",
+      "version": "v0.9.1",
+      "purl": "pkg:golang/github.com/pkg/errors@v0.9.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-70",
+      "type": "library",
+      "name": "github.com/planetscale/vtprotobuf",
+      "version": "v0.6.1-0.20250313105119-ba97887b0a25",
+      "purl": "pkg:golang/github.com/planetscale/vtprotobuf@v0.6.1-0.20250313105119-ba97887b0a25",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-71",
+      "type": "library",
+      "name": "github.com/remyoudompheng/bigfft",
+      "version": "v0.0.0-20230129092748-24d4a6f8daec",
+      "purl": "pkg:golang/github.com/remyoudompheng/bigfft@v0.0.0-20230129092748-24d4a6f8daec",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-72",
+      "type": "library",
+      "name": "github.com/rust-secure-code/go-rustaudit",
+      "version": "v0.0.0-20250226111315-e20ec32e963c",
+      "purl": "pkg:golang/github.com/rust-secure-code/go-rustaudit@v0.0.0-20250226111315-e20ec32e963c",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-73",
+      "type": "library",
+      "name": "github.com/sergi/go-diff",
+      "version": "v1.4.0",
+      "purl": "pkg:golang/github.com/sergi/go-diff@v1.4.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-74",
+      "type": "library",
+      "name": "github.com/shirou/gopsutil/v4",
+      "version": "v4.25.12",
+      "purl": "pkg:golang/github.com/shirou/gopsutil/v4@v4.25.12",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-75",
+      "type": "library",
+      "name": "github.com/sirupsen/logrus",
+      "version": "v1.9.4",
+      "purl": "pkg:golang/github.com/sirupsen/logrus@v1.9.4",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-76",
+      "type": "library",
+      "name": "github.com/tklauser/go-sysconf",
+      "version": "v0.3.16",
+      "purl": "pkg:golang/github.com/tklauser/go-sysconf@v0.3.16",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-77",
+      "type": "library",
+      "name": "github.com/tklauser/numcpus",
+      "version": "v0.11.0",
+      "purl": "pkg:golang/github.com/tklauser/numcpus@v0.11.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-78",
+      "type": "library",
+      "name": "github.com/vbatts/tar-split",
+      "version": "v0.12.2",
+      "purl": "pkg:golang/github.com/vbatts/tar-split@v0.12.2",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-79",
+      "type": "library",
+      "name": "github.com/yuin/gopher-lua",
+      "version": "v1.1.1",
+      "purl": "pkg:golang/github.com/yuin/gopher-lua@v1.1.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-80",
+      "type": "library",
+      "name": "go.mozilla.org/pkcs7",
+      "version": "v0.9.0",
+      "purl": "pkg:golang/go.mozilla.org/pkcs7@v0.9.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-81",
+      "type": "library",
+      "name": "go.opentelemetry.io/auto/sdk",
+      "version": "v1.2.1",
+      "purl": "pkg:golang/go.opentelemetry.io/auto/sdk@v1.2.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-82",
+      "type": "library",
+      "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+      "version": "v0.64.0",
+      "purl": "pkg:golang/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.64.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-83",
+      "type": "library",
+      "name": "go.opentelemetry.io/otel",
+      "version": "v1.41.0",
+      "purl": "pkg:golang/go.opentelemetry.io/otel@v1.41.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-84",
+      "type": "library",
+      "name": "go.opentelemetry.io/otel/metric",
+      "version": "v1.41.0",
+      "purl": "pkg:golang/go.opentelemetry.io/otel/metric@v1.41.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-85",
+      "type": "library",
+      "name": "go.opentelemetry.io/otel/trace",
+      "version": "v1.41.0",
+      "purl": "pkg:golang/go.opentelemetry.io/otel/trace@v1.41.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-86",
+      "type": "library",
+      "name": "golang.org/x/crypto",
+      "version": "v0.52.0",
+      "purl": "pkg:golang/golang.org/x/crypto@v0.52.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-87",
+      "type": "library",
+      "name": "golang.org/x/exp",
+      "version": "v0.0.0-20260112195511-716be5621a96",
+      "purl": "pkg:golang/golang.org/x/exp@v0.0.0-20260112195511-716be5621a96",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-88",
+      "type": "library",
+      "name": "golang.org/x/mod",
+      "version": "v0.35.0",
+      "purl": "pkg:golang/golang.org/x/mod@v0.35.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-89",
+      "type": "library",
+      "name": "golang.org/x/net",
+      "version": "v0.55.0",
+      "purl": "pkg:golang/golang.org/x/net@v0.55.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-90",
+      "type": "library",
+      "name": "golang.org/x/sync",
+      "version": "v0.20.0",
+      "purl": "pkg:golang/golang.org/x/sync@v0.20.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-91",
+      "type": "library",
+      "name": "golang.org/x/sys",
+      "version": "v0.45.0",
+      "purl": "pkg:golang/golang.org/x/sys@v0.45.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-92",
+      "type": "library",
+      "name": "golang.org/x/term",
+      "version": "v0.43.0",
+      "purl": "pkg:golang/golang.org/x/term@v0.43.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-93",
+      "type": "library",
+      "name": "golang.org/x/text",
+      "version": "v0.37.0",
+      "purl": "pkg:golang/golang.org/x/text@v0.37.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-94",
+      "type": "library",
+      "name": "golang.org/x/xerrors",
+      "version": "v0.0.0-20240903120638-7835f813f4da",
+      "purl": "pkg:golang/golang.org/x/xerrors@v0.0.0-20240903120638-7835f813f4da",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-95",
+      "type": "library",
+      "name": "google.golang.org/protobuf",
+      "version": "v1.36.11",
+      "purl": "pkg:golang/google.golang.org/protobuf@v1.36.11",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-96",
+      "type": "library",
+      "name": "modernc.org/libc",
+      "version": "v1.67.6",
+      "purl": "pkg:golang/modernc.org/libc@v1.67.6",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-97",
+      "type": "library",
+      "name": "modernc.org/mathutil",
+      "version": "v1.7.1",
+      "purl": "pkg:golang/modernc.org/mathutil@v1.7.1",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-98",
+      "type": "library",
+      "name": "modernc.org/memory",
+      "version": "v1.11.0",
+      "purl": "pkg:golang/modernc.org/memory@v1.11.0",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    },
+    {
+      "bom-ref": "comp-99",
+      "type": "library",
+      "name": "modernc.org/sqlite",
+      "version": "v1.44.3",
+      "purl": "pkg:golang/modernc.org/sqlite@v1.44.3",
+      "properties": [
+        {
+          "name": "amazon:inspector:sbom_generator:source_path",
+          "value": "inspector-sbomgen-1.14.4/linux/amd64/inspector-sbomgen"
+        }
+      ]
+    }
+  ]
+}

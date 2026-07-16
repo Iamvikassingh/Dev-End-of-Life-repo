@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "defaults": {
+    "fresh_ttl_days": 7,
+    "max_stale_days": 90,
+    "http_timeout_sec": 5,
+    "require_exact_date": true
+  },
+  "products": {
+    "aws-lambda": {
+      "canonical_product": "aws-lambda",
+      "sources": [
+        {
+          "id": "aws_lambda_docs",
+          "priority": 10,
+          "source_type": "aws_official_docs",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html",
+          "handler": "discover_lambda_from_docs",
+          "confidence_base": "HIGH"
+        }
+      ]
+    },
+    "amazon-eks": {
+      "canonical_product": "amazon-eks",
+      "sources": [
+        {
+          "id": "aws_eks_api",
+          "priority": 10,
+          "source_type": "aws_api",
+          "service": "eks",
+          "operation": "DescribeClusterVersions",
+          "handler": "discover_eks_from_api",
+          "confidence_base": "HIGH"
+        },
+        {
+          "id": "aws_eks_docs",
+          "priority": 20,
+          "source_type": "aws_official_docs",
+          "url": "https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html",
+          "handler": "discover_eks_from_docs",
+          "confidence_base": "HIGH"
+        }
+      ]
+    },
+    "ubuntu": {
+      "canonical_product": "ubuntu",
+      "sources": [
+        {
+          "id": "ubuntu_release_cycle",
+          "priority": 10,
+          "source_type": "vendor_docs",
+          "url": "https://ubuntu.com/about/release-cycle",
+          "handler": "discover_ubuntu_from_vendor_docs",
+          "confidence_base": "MEDIUM",
+          "require_exact_date": true,
+          "enabled": false,
+          "_note": "Disabled for MVP — Ubuntu page has month-level precision only"
+        }
+      ]
+    }
+  }
+}
