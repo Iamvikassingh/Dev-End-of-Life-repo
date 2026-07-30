@@ -510,6 +510,7 @@ function SnsSubscriptionsCard() {
   const { data, isLoading, refetch } = useSnsSubscriptions();
   const subscribe    = useSubscribeEmail();
   const unsubscribe  = useUnsubscribeEmail();
+  const verifySub    = useVerifySubscription();
   const sendTest     = useSendTestAlert();
   const triggerAlert = useTriggerEmailAlert();
 
@@ -518,6 +519,7 @@ function SnsSubscriptionsCard() {
   const [subOk,      setSubOk]      = useState("");
   const [testState,  setTestState]  = useState({ loading: false, ok: false, err: "" });
   const [dispState,  setDispState]  = useState({ loading: false, ok: false, err: "" });
+  const [verifySubId, setVerifySubId] = useState(null);
 
   const subscriptions = data?.subscriptions ?? [];
   const hasVerified   = subscriptions.some(s => s.status === "VERIFIED");
@@ -625,11 +627,12 @@ function SnsSubscriptionsCard() {
 
           {/* Pending info banner */}
           {subscriptions.some(s => s.status === "PENDING") && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
-              <AlertTriangle size={13} className="text-amber-600 mt-0.5 shrink-0" strokeWidth={2} />
-              <p className="text-xs text-amber-700">
-                <strong>Pending confirmation:</strong> Check your inbox for an AWS confirmation email and click <em>"Confirm subscription"</em> to activate alerts.
-              </p>
+            <div className="mt-3 flex items-start gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
+              <AlertTriangle size={13} className="text-indigo-600 mt-0.5 shrink-0" strokeWidth={2} />
+              <div className="text-xs text-indigo-800">
+                <p><strong>Action required to prevent deactivation:</strong> Email scanners often click the unsubscribe link in AWS emails. To prevent this, do <strong>NOT</strong> click the confirm link in your email.</p>
+                <p className="mt-1">Instead, right-click the "Confirm subscription" link in your email, select "Copy Link", and click <strong>Verify</strong> below to paste it.</p>
+              </div>
             </div>
           )}
         </div>
@@ -665,7 +668,16 @@ function SnsSubscriptionsCard() {
                   <td className="px-3 py-2.5 text-slate-400 hidden sm:table-cell">
                     {sub.created_at ? new Date(sub.created_at).toLocaleDateString() : "—"}
                   </td>
-                  <td className="px-3 py-2.5 text-right">
+                  <td className="px-3 py-2.5 text-right space-x-1">
+                    {sub.status === "PENDING" && (
+                      <button
+                        onClick={() => setVerifySubId(sub.id)}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                        title="Verify securely via UI"
+                      >
+                        <Check size={10} strokeWidth={2} /> Verify
+                      </button>
+                    )}
                     {sub.status !== "UNSUBSCRIBED" && (
                       <button
                         id={`sns-unsub-${sub.id}`}
@@ -713,9 +725,87 @@ function SnsSubscriptionsCard() {
           </div>
         )}
       </div>
+
+      {verifySubId && (
+        <VerifyModal
+          subId={verifySubId}
+          onClose={() => setVerifySubId(null)}
+          onVerify={async (url) => {
+            await verifySub.mutateAsync({ subId: verifySubId, subscribeUrl: url });
+            setVerifySubId(null);
+          }}
+        />
+      )}
     </div>
   );
 }
+
+function VerifyModal({ subId, onClose, onVerify }) {
+  const [url, setUrl] = useState("");
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErr("");
+    if (!url.trim()) {
+      setErr("Please paste the link first.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await onVerify(url.trim());
+    } catch (ex) {
+      setErr(ex.message || "Failed to verify. Link may be invalid or expired.");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl p-6 border border-slate-100">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-slate-900">Verify Subscription</h3>
+          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+            <X size={18} strokeWidth={2.5} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+            Please paste the <strong>"Confirm subscription"</strong> link you received in your email. This ensures email scanners cannot automatically unsubscribe you.
+          </p>
+          <input
+            type="text"
+            placeholder="https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription..."
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700 mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-300/50 focus:border-indigo-300 font-mono bg-slate-50"
+          />
+          {err && <p className="text-xs text-red-500 font-semibold mb-2">{err}</p>}
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            >
+              {loading ? <Loader size={14} className="animate-spin" /> : <Check size={14} strokeWidth={2} />}
+              Verify Securely
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 
 
 // ── Create API token modal ────────────────────────────────────────────────────

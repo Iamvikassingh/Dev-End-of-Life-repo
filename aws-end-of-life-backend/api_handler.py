@@ -4210,18 +4210,30 @@ def handle_ws_sns_subscribe(workspace_id: str, body: dict, headers: dict) -> dic
 def handle_ws_sns_verify(workspace_id: str, body: dict, headers: dict) -> dict:
     """
     POST /workspaces/:wsId/alerts/email-subscriptions/verify
-    Confirm an SNS subscription using the token from the AWS confirmation email.
-    Body: {sub_id, token}
+    Confirm an SNS subscription securely via the backend.
+    Body: { sub_id, token } OR { sub_id, subscribe_url }
     """
     ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
     if not ws:
         return _error_resp(401, err_code, "Workspace authentication failed")
 
-    sub_id = body.get("sub_id") or body.get("subId") or ""
-    token  = (body.get("token") or "").strip()
+    sub_id        = body.get("sub_id") or body.get("subId") or ""
+    token         = (body.get("token") or "").strip()
+    subscribe_url = (body.get("subscribe_url") or body.get("subscribeUrl") or "").strip()
 
-    if not sub_id or not token:
-        return _error_resp(400, "MISSING_FIELDS", "sub_id and token are required")
+    if not sub_id:
+        return _error_resp(400, "MISSING_FIELDS", "sub_id is required")
+
+    import sns_service
+    if subscribe_url:
+        try:
+            parsed = sns_service.parse_subscribe_url(subscribe_url)
+            token = parsed["Token"]
+        except Exception as e:
+            return _error_resp(400, "INVALID_URL", f"Could not parse subscribe URL: {e}")
+
+    if not token:
+        return _error_resp(400, "MISSING_FIELDS", "token or subscribe_url is required")
 
     storage = get_storage()
     subs    = storage.get_sns_subscriptions(workspace_id)
@@ -4231,12 +4243,11 @@ def handle_ws_sns_verify(workspace_id: str, body: dict, headers: dict) -> dict:
 
     topic_arn = sub.get("topic_arn", "")
     try:
-        import sns_service
         confirmed_arn = sns_service.confirm_subscription(topic_arn, token)
     except Exception as exc:
         logger.error("SNS confirm failed: %s", exc)
         return _error_resp(502, "SNS_CONFIRM_FAILED",
-                           "Confirmation failed — the token may have expired. Please re-subscribe.")
+                           "Confirmation failed — the link may be invalid or already processed.")
 
     from sns_subscriptions import update_subscription_status, STATUS_VERIFIED
     updated = update_subscription_status(sub, STATUS_VERIFIED, confirmed_arn)

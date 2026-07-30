@@ -109,9 +109,25 @@ def subscribe_email(topic_arn: str, email: str) -> str:
     return arn
 
 
+def parse_subscribe_url(url: str) -> dict:
+    """
+    Extract TopicArn and Token from an AWS SNS subscribe URL.
+    Example: https://sns.us-east-1.amazonaws.com/...?TopicArn=arn:aws:sns...&Token=...
+    """
+    from urllib.parse import urlparse, parse_qs
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query)
+    topic_arn = qs.get("TopicArn", [""])[0]
+    token = qs.get("Token", [""])[0]
+    if not topic_arn or not token:
+        raise ValueError("Invalid subscribe URL: Missing TopicArn or Token")
+    return {"TopicArn": topic_arn, "Token": token}
+
+
 def confirm_subscription(topic_arn: str, token: str) -> str:
     """
     Confirm an SNS email subscription using the token from the confirmation email.
+    Sets AuthenticateOnUnsubscribe to "true" to prevent email scanners from unsubscribing.
     Returns the confirmed SubscriptionArn.
     """
     client = _get_client()
@@ -119,7 +135,7 @@ def confirm_subscription(topic_arn: str, token: str) -> str:
     response = _retry(client.confirm_subscription,
         TopicArn=topic_arn,
         Token=token,
-        AuthenticateOnUnsubscribe="false",
+        AuthenticateOnUnsubscribe="true",
     )
     arn = response.get("SubscriptionArn", "")
     logger.info("SNS subscription confirmed: %s", arn)

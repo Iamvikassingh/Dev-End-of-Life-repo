@@ -326,3 +326,19 @@ class TestApiHandlerSnsRoutes:
         assert result["statusCode"] == 400
         body = json.loads(result["body"])
         assert body["error"]["code"] == "NO_VERIFIED_SUBSCRIBERS"
+
+
+# ── sns_service module ─────────────────────────────────────────────────────────
+
+class TestSnsService:
+    def test_parse_subscribe_url_valid(self):
+        import sns_service
+        url = "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=arn:aws:sns:us-east-1:123:eolm-ws-ws1&Token=abc123tokenXYZ"
+        res = sns_service.parse_subscribe_url(url)
+        assert res["TopicArn"] == "arn:aws:sns:us-east-1:123:eolm-ws-ws1"
+        assert res["Token"] == "abc123tokenXYZ"
+
+    def test_parse_subscribe_url_missing_fields(self):
+        import sns_service
+        with pytest.raises(ValueError, match="Missing TopicArn or Token"):
+            sns_service.parse_subscribe_url("https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&Token=abc")

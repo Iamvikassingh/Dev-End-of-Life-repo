@@ -74,9 +74,12 @@ export function useVerifySubscription() {
   const qc   = useQueryClient();
   const wsId = getWorkspaceId();
   return useMutation({
-    mutationFn: async ({ subId, token }) => {
+    mutationFn: async ({ subId, token, subscribeUrl }) => {
       if (isDemoEnabled()) return { ok: true };
-      return _call(`/workspaces/${wsId}/alerts/email-subscriptions/verify`, "POST", { sub_id: subId, token });
+      const body = { sub_id: subId };
+      if (token) body.token = token;
+      if (subscribeUrl) body.subscribe_url = subscribeUrl;
+      return _call(`/workspaces/${wsId}/alerts/email-subscriptions/verify`, "POST", body);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["sns-subscriptions", wsId] }),
   });
