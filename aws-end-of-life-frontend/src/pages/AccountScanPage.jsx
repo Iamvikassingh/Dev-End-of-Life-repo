@@ -379,7 +379,7 @@ Resources:
           - Sid: AllowEOLMonitorBackendAssumeRole
             Effect: Allow
             Principal:
-              AWS: "arn:aws:iam::164761934067:role/EOLMonitorBackendEC2Role"
+              AWS: "arn:aws:iam::164761934067:user/vikassingh9625"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
