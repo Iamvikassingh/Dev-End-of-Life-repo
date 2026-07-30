@@ -1,9 +1,14 @@
 import boto3
-import os
+import sys
 
 sns = boto3.client('sns', region_name='us-east-1')
-topic_arn = sns.create_topic(Name='test-auth-unsubscribe')['TopicArn']
-print(f"Topic: {topic_arn}")
-
-sub_arn = sns.subscribe(TopicArn=topic_arn, Protocol='email', Endpoint='test@example.com')['SubscriptionArn']
-print(f"Sub ARN: {sub_arn}")
+try:
+    sns.confirm_subscription(
+        TopicArn="arn:aws:sns:us-east-1:123456789012:test",
+        Token="token",
+        AuthenticateOnUnsubscribe="true",
+        InvalidArg="test"
+    )
+except Exception as e:
+    print(f"Exception Type: {type(e).__name__}")
+    print(f"Exception: {e}")

@@ -64,6 +64,8 @@ def _retry(fn, *args, **kwargs):
             logger.warning("SNS network error retry %d/%d — %s", attempt + 1, MAX_RETRIES, exc)
         wait = BASE_BACKOFF * (2 ** attempt)
         time.sleep(wait)
+    if last_exc is None:
+        raise RuntimeError("Retry loop failed without exception")
     raise last_exc
 
 

@@ -13,6 +13,7 @@ import {
   useSnsSubscriptions,
   useSubscribeEmail,
   useUnsubscribeEmail,
+  useVerifySubscription,
   useSendTestAlert,
   useTriggerEmailAlert,
 } from "../hooks/useSnsSubscriptions";
