@@ -1,0 +1,52 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SNSTopicManagement",
+      "Effect": "Allow",
+      "Action": [
+        "sns:CreateTopic",
+        "sns:GetTopicAttributes",
+        "sns:SetTopicAttributes",
+        "sns:ListTopics"
+      ],
+      "Resource": "arn:aws:sns:*:*:eolm-ws-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "${AWS_REGION}"
+        }
+      }
+    },
+    {
+      "Sid": "SNSSubscriptionManagement",
+      "Effect": "Allow",
+      "Action": [
+        "sns:Subscribe",
+        "sns:ConfirmSubscription",
+        "sns:Unsubscribe",
+        "sns:ListSubscriptionsByTopic",
+        "sns:GetSubscriptionAttributes"
+      ],
+      "Resource": "arn:aws:sns:*:*:eolm-ws-*"
+    },
+    {
+      "Sid": "SNSPublishAlerts",
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish"
+      ],
+      "Resource": "arn:aws:sns:*:*:eolm-ws-*"
+    },
+    {
+      "Sid": "CloudWatchLogging",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/eol-monitor/*"
+    }
+  ]
+}

@@ -437,6 +437,77 @@ class DynamoDBBackend:
         })
         return log
 
+    # ── SNS Email Subscriptions (DynamoDB) ───────────────────────────────────
+
+    def _sns_subs_key(self, workspace_id: str) -> str:
+        return f"sns_subscriptions_{workspace_id}"
+
+    def _sns_history_key(self, workspace_id: str) -> str:
+        return f"sns_notif_history_{workspace_id}"
+
+    def get_sns_subscriptions(self, workspace_id: str) -> list:
+        try:
+            item = self._config.get_item(
+                Key={"config_key": self._sns_subs_key(workspace_id)}
+            ).get("Item")
+        except Exception:
+            return []
+        return json.loads((item or {}).get("records_json", "[]"))
+
+    def save_sns_subscription(self, sub: dict) -> dict:
+        ws_id = sub.get("workspace_id", "")
+        subs  = self.get_sns_subscriptions(ws_id)
+        idx   = next((i for i, s in enumerate(subs) if s.get("id") == sub.get("id")), None)
+        if idx is not None:
+            subs[idx] = sub
+        else:
+            subs.insert(0, sub)
+        self._config.put_item(Item={
+            "config_key":   self._sns_subs_key(ws_id),
+            "records_json": json.dumps(subs, default=_serial),
+            "updated_at":   datetime.now(timezone.utc).isoformat(),
+        })
+        return sub
+
+    def delete_sns_subscription(self, sub_id: str, workspace_id: str) -> bool:
+        subs     = self.get_sns_subscriptions(workspace_id)
+        new_subs = [s for s in subs if s.get("id") != sub_id]
+        if len(new_subs) == len(subs):
+            return False
+        self._config.put_item(Item={
+            "config_key":   self._sns_subs_key(workspace_id),
+            "records_json": json.dumps(new_subs, default=_serial),
+            "updated_at":   datetime.now(timezone.utc).isoformat(),
+        })
+        return True
+
+    def get_sns_notification_history(self, workspace_id: str, limit: int = 100) -> list:
+        try:
+            item = self._config.get_item(
+                Key={"config_key": self._sns_history_key(workspace_id)}
+            ).get("Item")
+        except Exception:
+            return []
+        history = json.loads((item or {}).get("records_json", "[]"))
+        return history[:limit]
+
+    def save_sns_notification_history(self, record: dict) -> dict:
+        ws_id   = record.get("workspace_id", "")
+        history = self.get_sns_notification_history(ws_id, limit=500)
+        history.insert(0, record)
+        self._config.put_item(Item={
+            "config_key":   self._sns_history_key(ws_id),
+            "records_json": json.dumps(history[:200], default=_serial),
+            "updated_at":   datetime.now(timezone.utc).isoformat(),
+        })
+        return record
+
+    def is_duplicate_sns_alert(self, workspace_id: str, resource_id: str,
+                                severity: str, cooldown_hours: int = 24) -> bool:
+        from sns_subscriptions import is_within_cooldown
+        history = self.get_sns_notification_history(workspace_id, limit=500)
+        return is_within_cooldown(history, workspace_id, resource_id, severity, cooldown_hours)
+
     # ── API tokens (DynamoDB) ────────────────────────────────────────────────
 
     def _api_tokens_key(self, workspace_id: str) -> str:
@@ -1434,6 +1505,50 @@ class S3Backend:
         self._write(self.NOTIF_LOGS_KEY, logs[:500])
         return log
 
+    # ── SNS Email Subscriptions (S3) ─────────────────────────────────────────
+
+    SNS_SUBS_KEY    = "eol/sns_subscriptions.json"
+    SNS_HISTORY_KEY = "eol/sns_notification_history.json"
+
+    def get_sns_subscriptions(self, workspace_id: str) -> list:
+        return [s for s in self._read(self.SNS_SUBS_KEY, [])
+                if s.get("workspace_id") == workspace_id]
+
+    def save_sns_subscription(self, sub: dict) -> dict:
+        all_subs = self._read(self.SNS_SUBS_KEY, [])
+        idx = next((i for i, s in enumerate(all_subs) if s.get("id") == sub.get("id")), None)
+        if idx is not None:
+            all_subs[idx] = sub
+        else:
+            all_subs.insert(0, sub)
+        self._write(self.SNS_SUBS_KEY, all_subs)
+        return sub
+
+    def delete_sns_subscription(self, sub_id: str, workspace_id: str) -> bool:
+        all_subs = self._read(self.SNS_SUBS_KEY, [])
+        new_subs = [s for s in all_subs if not (s.get("id") == sub_id and s.get("workspace_id") == workspace_id)]
+        if len(new_subs) == len(all_subs):
+            return False
+        self._write(self.SNS_SUBS_KEY, new_subs)
+        return True
+
+    def get_sns_notification_history(self, workspace_id: str, limit: int = 100) -> list:
+        history = [h for h in self._read(self.SNS_HISTORY_KEY, [])
+                   if h.get("workspace_id") == workspace_id]
+        return history[:limit]
+
+    def save_sns_notification_history(self, record: dict) -> dict:
+        history = self._read(self.SNS_HISTORY_KEY, [])
+        history.insert(0, record)
+        self._write(self.SNS_HISTORY_KEY, history[:1000])
+        return record
+
+    def is_duplicate_sns_alert(self, workspace_id: str, resource_id: str,
+                                severity: str, cooldown_hours: int = 24) -> bool:
+        from sns_subscriptions import is_within_cooldown
+        history = self.get_sns_notification_history(workspace_id, limit=500)
+        return is_within_cooldown(history, workspace_id, resource_id, severity, cooldown_hours)
+
     # ── API tokens (S3) ──────────────────────────────────────────────────────
 
     API_TOKENS_KEY = "eol/api_tokens.json"
@@ -1620,6 +1735,8 @@ class FileBackend:
         self._org_scan_runs_path     = os.path.join(EOL_DATA_DIR, "org_scan_runs.json")
         self._eol_overrides_path          = os.path.join(EOL_DATA_DIR, "eol_overrides.json")
         self._verified_lifecycle_path     = os.path.join(EOL_DATA_DIR, "eol_verified_lifecycle.json")
+        self._sns_subs_path              = os.path.join(EOL_DATA_DIR, "sns_subscriptions.json")
+        self._sns_history_path           = os.path.join(EOL_DATA_DIR, "sns_notification_history.json")
 
     def _read(self, path: str, default: Any = None) -> Any:
         try:
@@ -1835,6 +1952,47 @@ class FileBackend:
         logs.insert(0, log)
         self._write(self._notif_logs_path, logs[:500])
         return log
+
+    # ── SNS Email Subscriptions (File) ───────────────────────────────────────
+
+    def get_sns_subscriptions(self, workspace_id: str) -> list:
+        return [s for s in self._read(self._sns_subs_path, [])
+                if s.get("workspace_id") == workspace_id]
+
+    def save_sns_subscription(self, sub: dict) -> dict:
+        all_subs = self._read(self._sns_subs_path, [])
+        idx = next((i for i, s in enumerate(all_subs) if s.get("id") == sub.get("id")), None)
+        if idx is not None:
+            all_subs[idx] = sub
+        else:
+            all_subs.insert(0, sub)
+        self._write(self._sns_subs_path, all_subs)
+        return sub
+
+    def delete_sns_subscription(self, sub_id: str, workspace_id: str) -> bool:
+        all_subs = self._read(self._sns_subs_path, [])
+        new_subs = [s for s in all_subs if not (s.get("id") == sub_id and s.get("workspace_id") == workspace_id)]
+        if len(new_subs) == len(all_subs):
+            return False
+        self._write(self._sns_subs_path, new_subs)
+        return True
+
+    def get_sns_notification_history(self, workspace_id: str, limit: int = 100) -> list:
+        history = [h for h in self._read(self._sns_history_path, [])
+                   if h.get("workspace_id") == workspace_id]
+        return history[:limit]
+
+    def save_sns_notification_history(self, record: dict) -> dict:
+        history = self._read(self._sns_history_path, [])
+        history.insert(0, record)
+        self._write(self._sns_history_path, history[:1000])
+        return record
+
+    def is_duplicate_sns_alert(self, workspace_id: str, resource_id: str,
+                                severity: str, cooldown_hours: int = 24) -> bool:
+        from sns_subscriptions import is_within_cooldown
+        history = self.get_sns_notification_history(workspace_id, limit=500)
+        return is_within_cooldown(history, workspace_id, resource_id, severity, cooldown_hours)
 
     # ── API tokens (File) ─────────────────────────────────────────────────────
 
@@ -2798,6 +2956,63 @@ class PostgresBackend:
         """, (log.get("id", ""), log.get("workspaceId", ""),
               log.get("createdAt", ""), self._j(log)))
         return log
+
+    # ── SNS Email Subscriptions (Postgres) ───────────────────────────────────
+
+    def get_sns_subscriptions(self, workspace_id: str) -> list:
+        rows = self._query(
+            "SELECT payload FROM sns_email_subscriptions WHERE workspace_id = %s ORDER BY created_at DESC",
+            (workspace_id,))
+        return [self._p(r) for r in rows]
+
+    def save_sns_subscription(self, sub: dict) -> dict:
+        self._run("""
+            INSERT INTO sns_email_subscriptions (id, workspace_id, email, payload, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, NOW(), NOW())
+            ON CONFLICT (id) DO UPDATE SET
+                payload    = EXCLUDED.payload,
+                updated_at = NOW()
+        """, (sub.get("id", ""), sub.get("workspace_id", ""),
+              sub.get("email", ""), self._j(sub)))
+        return sub
+
+    def delete_sns_subscription(self, sub_id: str, workspace_id: str) -> bool:
+        count = self._run(
+            "DELETE FROM sns_email_subscriptions WHERE id = %s AND workspace_id = %s",
+            (sub_id, workspace_id))
+        return (count or 0) > 0
+
+    def get_sns_notification_history(self, workspace_id: str, limit: int = 100) -> list:
+        rows = self._query("""
+            SELECT payload FROM sns_notification_history
+            WHERE workspace_id = %s ORDER BY sent_at DESC LIMIT %s
+        """, (workspace_id, limit))
+        return [self._p(r) for r in rows]
+
+    def save_sns_notification_history(self, record: dict) -> dict:
+        self._run("""
+            INSERT INTO sns_notification_history
+                (id, workspace_id, cooldown_key, sent_at, status, payload)
+            VALUES (%s, %s, %s, NOW(), %s, %s)
+            ON CONFLICT (id) DO NOTHING
+        """, (record.get("id", ""), record.get("workspace_id", ""),
+              record.get("cooldown_key", ""), record.get("status", ""),
+              self._j(record)))
+        return record
+
+    def is_duplicate_sns_alert(self, workspace_id: str, resource_id: str,
+                                severity: str, cooldown_hours: int = 24) -> bool:
+        from sns_subscriptions import _cooldown_key
+        key = _cooldown_key(workspace_id, resource_id, severity)
+        row = self._one("""
+            SELECT 1 FROM sns_notification_history
+            WHERE workspace_id = %s
+              AND cooldown_key  = %s
+              AND status        = 'SENT'
+              AND sent_at      > NOW() - INTERVAL '%s hours'
+            LIMIT 1
+        """, (workspace_id, key, cooldown_hours))
+        return row is not None
 
     # ── API tokens ─────────────────────────────────────────────────────────────
 

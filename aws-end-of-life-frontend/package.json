@@ -31,7 +31,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "concurrently --kill-others --names \"API,UI\" --prefix-colors \"cyan,magenta\" \"STORAGE_BACKEND=file EOL_DATA_DIR=/tmp/eol-data python3 ../scripts/run-local-backend.py\" \"npm start\""
+    "dev": "npm start",
+    "dev:full": "concurrently --kill-others --names \"API,UI\" --prefix-colors \"cyan,magenta\" \"STORAGE_BACKEND=file EOL_DATA_DIR=/tmp/eol-data python3 ../aws-end-of-life-backend/scripts/run-local-backend.py\" \"npm start\""
   },
   "browserslist": {
     "production": [

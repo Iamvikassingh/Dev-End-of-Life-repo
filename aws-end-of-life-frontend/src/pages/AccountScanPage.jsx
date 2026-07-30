@@ -21,29 +21,29 @@ import { AppSelect } from "../components/AppSelect";
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const AWS_REGIONS = [
-  { value: "us-east-1",      label: "us-east-1 (N. Virginia)"    },
-  { value: "us-east-2",      label: "us-east-2 (Ohio)"           },
-  { value: "us-west-1",      label: "us-west-1 (N. California)"  },
-  { value: "us-west-2",      label: "us-west-2 (Oregon)"         },
-  { value: "ap-south-1",     label: "ap-south-1 (Mumbai)"        },
+  { value: "us-east-1", label: "us-east-1 (N. Virginia)" },
+  { value: "us-east-2", label: "us-east-2 (Ohio)" },
+  { value: "us-west-1", label: "us-west-1 (N. California)" },
+  { value: "us-west-2", label: "us-west-2 (Oregon)" },
+  { value: "ap-south-1", label: "ap-south-1 (Mumbai)" },
   { value: "ap-southeast-1", label: "ap-southeast-1 (Singapore)" },
-  { value: "ap-southeast-2", label: "ap-southeast-2 (Sydney)"    },
-  { value: "ap-northeast-1", label: "ap-northeast-1 (Tokyo)"     },
-  { value: "eu-west-1",      label: "eu-west-1 (Ireland)"        },
-  { value: "eu-west-2",      label: "eu-west-2 (London)"         },
-  { value: "eu-central-1",   label: "eu-central-1 (Frankfurt)"   },
-  { value: "ca-central-1",   label: "ca-central-1 (Canada)"      },
-  { value: "sa-east-1",      label: "sa-east-1 (São Paulo)"      },
+  { value: "ap-southeast-2", label: "ap-southeast-2 (Sydney)" },
+  { value: "ap-northeast-1", label: "ap-northeast-1 (Tokyo)" },
+  { value: "eu-west-1", label: "eu-west-1 (Ireland)" },
+  { value: "eu-west-2", label: "eu-west-2 (London)" },
+  { value: "eu-central-1", label: "eu-central-1 (Frankfurt)" },
+  { value: "ca-central-1", label: "ca-central-1 (Canada)" },
+  { value: "sa-east-1", label: "sa-east-1 (São Paulo)" },
 ];
 
 const DEMO_SCAN_RESULT = { total: 24, EOL: 7, EXPIRING_SOON: 7, EXTENDED_SUPPORT: 4, SUPPORTED: 6 };
-const DEMO_RESCAN      = { total: 28, EOL: 8, EXPIRING_SOON: 8, EXTENDED_SUPPORT: 4, SUPPORTED: 7, UNKNOWN: 1 };
+const DEMO_RESCAN = { total: 28, EOL: 8, EXPIRING_SOON: 8, EXTENDED_SUPPORT: 4, SUPPORTED: 7, UNKNOWN: 1 };
 
 const SCAN_ERROR_MESSAGES = {
-  ASSUME_ROLE_FAILED:    "Could not assume the IAM role. Verify the role ARN, external ID, and trust policy.",
-  ACCESS_DENIED:         "Access denied. Check that the IAM role has the required permissions.",
+  ASSUME_ROLE_FAILED: "Could not assume the IAM role. Verify the role ARN, external ID, and trust policy.",
+  ACCESS_DENIED: "Access denied. Check that the IAM role has the required permissions.",
   SERVICE_ACCESS_DENIED: "IAM role assumed, but one or more services were inaccessible. Check service-level IAM permissions.",
-  SCAN_FAILED:           "Scan failed due to an unexpected error.",
+  SCAN_FAILED: "Scan failed due to an unexpected error.",
 };
 
 // ── Utility ────────────────────────────────────────────────────────────────────
@@ -56,12 +56,12 @@ function _cryptoRandHex(bytes) {
 
 function getOrCreateExternalId() {
   const wsId = getWorkspaceId() || "default";
-  const key  = `eol_ext_id_${wsId}`;
+  const key = `eol_ext_id_${wsId}`;
   const stored = localStorage.getItem(key);
   if (stored) return stored;
   // 20 bytes = 160 bits entropy, formatted as eolm-<8hex>-<12hex> (base-16, 20 chars)
   const hex = _cryptoRandHex(10);
-  const id  = `eolm-${hex.slice(0, 8)}-${hex.slice(8)}`.toUpperCase();
+  const id = `eolm-${hex.slice(0, 8)}-${hex.slice(8)}`.toUpperCase();
   localStorage.setItem(key, id);
   return id;
 }
@@ -137,7 +137,7 @@ function getAccountRegions(account) {
   if (account.scanAllRegions === true) return [];
   if (Array.isArray(account.regions)) return [...account.regions].sort();
   // Legacy format
-  if (account.regions === "single")   return account.singleRegion ? [account.singleRegion] : [];
+  if (account.regions === "single") return account.singleRegion ? [account.singleRegion] : [];
   if (account.regions === "selected") return [...(account.selectedRegions || [])].sort();
   return [];
 }
@@ -155,11 +155,10 @@ function CopyBtn({ value, label }) {
     <button
       onClick={copy}
       aria-label={`Copy ${label ?? "value"}`}
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
-        copied
-          ? "bg-emerald-50 text-emerald-600"
-          : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-      }`}
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${copied
+        ? "bg-emerald-50 text-emerald-600"
+        : "bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+        }`}
     >
       {copied
         ? <><Check size={11} strokeWidth={2.5} /> Copied</>
@@ -178,8 +177,8 @@ function ScanStatusPill({ status, isScanning }) {
     );
   }
   const cfg = {
-    success: { cls: "bg-emerald-100 text-emerald-700", Icon: CheckCircle, label: "Connected"   },
-    failed:  { cls: "bg-red-100 text-red-700",         Icon: AlertCircle, label: "Scan Failed" },
+    success: { cls: "bg-emerald-100 text-emerald-700", Icon: CheckCircle, label: "Connected" },
+    failed: { cls: "bg-red-100 text-red-700", Icon: AlertCircle, label: "Scan Failed" },
   }[status] ?? { cls: "bg-gray-100 text-gray-500", Icon: Clock, label: "Never Scanned" };
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${cfg.cls}`}>
@@ -191,11 +190,11 @@ function ScanStatusPill({ status, isScanning }) {
 
 function CountPill({ value, label, color }) {
   const cls = {
-    red:   "bg-red-50   text-red-700",
+    red: "bg-red-50   text-red-700",
     amber: "bg-amber-50 text-amber-700",
-    blue:  "bg-blue-50  text-blue-700",
+    blue: "bg-blue-50  text-blue-700",
     green: "bg-green-50 text-green-700",
-    gray:  "bg-gray-100 text-gray-500",
+    gray: "bg-gray-100 text-gray-500",
   }[color] ?? "bg-gray-100 text-gray-500";
   return (
     <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold ${cls}`}>
@@ -247,9 +246,8 @@ function TemplateSection({ label, value, onDownload }) {
       </pre>
       <div className="flex gap-2">
         <button onClick={copy}
-          className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${
-            copied ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-          }`}>
+          className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${copied ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+            }`}>
           {copied ? "✓ Copied" : "Copy template"}
         </button>
         <button onClick={onDownload}
@@ -273,11 +271,10 @@ function CopyBox({ label, value, copyLabel = "Copy" }) {
       <div className="flex items-start gap-2">
         <pre className="flex-1 bg-gray-900 text-green-400 text-xs rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all font-mono leading-relaxed">{value}</pre>
         <button onClick={copy}
-          className={`shrink-0 mt-1 px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${
-            copied
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-          }`}>
+          className={`shrink-0 mt-1 px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${copied
+            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+            : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+            }`}>
           {copied ? "✓ Copied" : copyLabel}
         </button>
       </div>
@@ -295,11 +292,10 @@ function StepIndicator({ current, total }) {
       <div className="flex items-center gap-1">
         {[...Array(total)].map((_, i) => (
           <React.Fragment key={i}>
-            <div className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition-all shrink-0 ${
-              i + 1 < current ? "bg-emerald-500 text-white" :
+            <div className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition-all shrink-0 ${i + 1 < current ? "bg-emerald-500 text-white" :
               i + 1 === current ? "bg-gray-900 text-white" :
-              "bg-gray-200 text-gray-400"
-            }`}>
+                "bg-gray-200 text-gray-400"
+              }`}>
               {i + 1 < current ? "✓" : i + 1}
             </div>
             {i < total - 1 && <div className={`flex-1 h-0.5 ${i + 1 < current ? "bg-emerald-400" : "bg-gray-200"}`} />}
@@ -309,11 +305,10 @@ function StepIndicator({ current, total }) {
       <div className="flex mt-1.5" style={{ gap: 0 }}>
         {[...Array(total)].map((_, i) => (
           <div key={i} className="flex-1 text-center" style={{ minWidth: 0 }}>
-            <span className={`text-xs truncate block ${
-              i + 1 === current ? "text-gray-700 font-semibold" :
+            <span className={`text-xs truncate block ${i + 1 === current ? "text-gray-700 font-semibold" :
               i + 1 < current ? "text-emerald-600" :
-              "text-gray-400"
-            }`}>
+                "text-gray-400"
+              }`}>
               {STEP_LABELS[i]}
             </span>
           </div>
@@ -327,7 +322,7 @@ function StepIndicator({ current, total }) {
 
 function WizardView({ onComplete, onCancel }) {
   const [externalId, setExternalId] = useState(getOrCreateExternalId);
-  const [step, setStep]  = useState(1);
+  const [step, setStep] = useState(1);
   const [deployTab, setDeployTab] = useState("cfn");
   const [extIdCopied, setExtIdCopied] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -335,7 +330,7 @@ function WizardView({ onComplete, onCancel }) {
     accountName: "", accountId: "", roleArn: "",
     regions: "all", singleRegion: "ap-south-1", selectedRegions: [],
   });
-  const [validating, setValidating]  = useState(false);
+  const [validating, setValidating] = useState(false);
   const [validResult, setValidResult] = useState(null);
 
   // Sync ExternalId with server on mount so it survives localStorage clears.
@@ -384,7 +379,7 @@ Resources:
           - Sid: AllowEOLMonitorBackendAssumeRole
             Effect: Allow
             Principal:
-              AWS: "arn:aws:iam::495234635788:role/EOLMonitorBackendEC2Role"
+              AWS: "arn:aws:iam::164761934067:role/EOLMonitorBackendEC2Role"
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -458,8 +453,8 @@ Outputs:
 
   function downloadTemplate() {
     const blob = new Blob([CF_TEMPLATE], { type: "text/yaml" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
     a.href = url;
     a.download = "eol-monitor-readonly-role.yaml";
     document.body.appendChild(a);
@@ -472,13 +467,13 @@ Outputs:
     setValidating(true);
     setValidResult(null);
     const result = await validateRoleOnServer({
-      roleArn:      form.roleArn,
+      roleArn: form.roleArn,
       externalId,
       awsAccountId: form.accountId,
-      accountName:  form.accountName,
+      accountName: form.accountName,
     });
     setValidResult(result.ok
-      ? { ok: true,  msg: `Role validated. AWS account ${result.accountId} can be scanned with read-only access.` }
+      ? { ok: true, msg: `Role validated. AWS account ${result.accountId} can be scanned with read-only access.` }
       : { ok: false, msg: result.error?.message || "Unable to assume role. Check trust policy, ExternalId, and Role ARN." }
     );
     setValidating(false);
@@ -487,11 +482,11 @@ Outputs:
   const inputCls = "w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300/50 focus:border-indigo-300 transition-colors";
 
   const steps = [
-    { label: "Generate ExternalId"  },
+    { label: "Generate ExternalId" },
     { label: "Deploy Role Template" },
-    { label: "Enter Role ARN"       },
-    { label: "Validate Access"      },
-    { label: "View Dashboard"       },
+    { label: "Enter Role ARN" },
+    { label: "Validate Access" },
+    { label: "View Dashboard" },
   ];
 
   return (
@@ -563,11 +558,10 @@ Outputs:
               <code className="flex-1 font-mono text-xs text-slate-800 truncate">{externalId}</code>
               <button
                 onClick={copyExtId}
-                className={`shrink-0 text-xs px-2.5 py-1 rounded-lg border font-medium transition-colors ${
-                  extIdCopied
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-                }`}
+                className={`shrink-0 text-xs px-2.5 py-1 rounded-lg border font-medium transition-colors ${extIdCopied
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
               >
                 {extIdCopied ? "✓ Copied" : "Copy"}
               </button>
@@ -579,16 +573,15 @@ Outputs:
             <div className="flex border-b border-gray-200 mb-3">
               {[
                 { key: "cfn", label: "CloudFormation Template" },
-                { key: "cli", label: "AWS CLI"                 },
+                { key: "cli", label: "AWS CLI" },
               ].map(t => (
                 <button
                   key={t.key}
                   onClick={() => setDeployTab(t.key)}
-                  className={`px-4 py-2 text-xs font-semibold border-b-2 -mb-px transition-colors ${
-                    deployTab === t.key
-                      ? "border-gray-900 text-gray-900"
-                      : "border-transparent text-gray-400 hover:text-gray-600"
-                  }`}
+                  className={`px-4 py-2 text-xs font-semibold border-b-2 -mb-px transition-colors ${deployTab === t.key
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-gray-400 hover:text-gray-600"
+                    }`}
                 >
                   {t.label}
                 </button>
@@ -628,14 +621,14 @@ Outputs:
 
       {/* Step 3 — Role ARN + inline validation */}
       {step === 3 && (() => {
-        const hasSpaces       = form.roleArn.includes(" ");
-        const arnValid        = !hasSpaces && /^arn:aws:iam::\d{12}:role\/.+$/.test(form.roleArn);
-        const idValid         = /^\d{12}$/.test(form.accountId);
+        const hasSpaces = form.roleArn.includes(" ");
+        const arnValid = !hasSpaces && /^arn:aws:iam::\d{12}:role\/.+$/.test(form.roleArn);
+        const idValid = /^\d{12}$/.test(form.accountId);
         const arnAccountMatch = !form.roleArn || !form.accountId || !idValid || !arnValid
           ? true : form.roleArn.includes(`:${form.accountId}:`);
-        const regionValid     = form.regions === "all" || form.regions === "single" || (form.regions === "selected" && form.selectedRegions.length > 0);
-        const canValidate     = form.accountName.trim() && idValid && arnValid && arnAccountMatch && regionValid;
-        const canAdvance      = canValidate && validResult?.ok === true;
+        const regionValid = form.regions === "all" || form.regions === "single" || (form.regions === "selected" && form.selectedRegions.length > 0);
+        const canValidate = form.accountName.trim() && idValid && arnValid && arnAccountMatch && regionValid;
+        const canAdvance = canValidate && validResult?.ok === true;
         const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`;
 
         function toggleRegion(r) {
@@ -696,19 +689,18 @@ Outputs:
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Region Scope</label>
               <div className="flex gap-2 mb-3">
                 {[
-                  { value: "all",      label: "All regions"    },
-                  { value: "single",   label: "Single region"  },
+                  { value: "all", label: "All regions" },
+                  { value: "single", label: "Single region" },
                   { value: "selected", label: "Select regions" },
                 ].map(opt => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => { setForm(f => ({ ...f, regions: opt.value, selectedRegions: [] })); setValidResult(null); }}
-                    className={`flex-1 text-xs font-semibold py-2 rounded-lg border transition-all ${
-                      form.regions === opt.value
-                        ? "bg-gray-900 text-white border-gray-900"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700"
-                    }`}
+                    className={`flex-1 text-xs font-semibold py-2 rounded-lg border transition-all ${form.regions === opt.value
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-700"
+                      }`}
                   >
                     {opt.label}
                   </button>
@@ -806,11 +798,10 @@ Outputs:
                 </div>
               )}
               {validResult && (
-                <div className={`rounded-lg px-4 py-3 text-sm flex items-start gap-2 ${
-                  validResult.ok
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-red-50 text-red-700 border border-red-200"
-                }`}>
+                <div className={`rounded-lg px-4 py-3 text-sm flex items-start gap-2 ${validResult.ok
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+                  }`}>
                   {validResult.ok ? <CheckCircle size={16} className="shrink-0 mt-0.5" /> : <AlertCircle size={16} className="shrink-0 mt-0.5" />}
                   <div>
                     <p className="font-semibold">{validResult.ok ? "Role validated" : "Validation failed"}</p>
@@ -862,13 +853,15 @@ Outputs:
 
           <div className="bg-gray-50 rounded-xl border border-gray-100 divide-y divide-gray-100 text-sm">
             {[
-              { label: "Account Name",   value: form.accountName || "—" },
-              { label: "AWS Account ID", value: form.accountId   || "—", mono: true },
-              { label: "Role ARN",       value: form.roleArn     || "—", mono: true },
-              { label: "ExternalId",     value: externalId,              mono: true },
-              { label: "Region Scope",   value: regionScopeLabel(form)               },
-              { label: "Validation",     value: validResult?.ok ? "✓ Verified" : "✗ Not verified",
-                valueClass: validResult?.ok ? "text-emerald-600 font-semibold" : "text-red-600 font-semibold" },
+              { label: "Account Name", value: form.accountName || "—" },
+              { label: "AWS Account ID", value: form.accountId || "—", mono: true },
+              { label: "Role ARN", value: form.roleArn || "—", mono: true },
+              { label: "ExternalId", value: externalId, mono: true },
+              { label: "Region Scope", value: regionScopeLabel(form) },
+              {
+                label: "Validation", value: validResult?.ok ? "✓ Verified" : "✗ Not verified",
+                valueClass: validResult?.ok ? "text-emerald-600 font-semibold" : "text-red-600 font-semibold"
+              },
             ].map(row => (
               <div key={row.label} className="flex items-center justify-between px-4 py-2.5 gap-4">
                 <span className="text-gray-500 shrink-0">{row.label}</span>
@@ -932,7 +925,7 @@ function RegionChips({ account }) {
   }
   const MAX_SHOW = 4;
   const shown = regions.slice(0, MAX_SHOW);
-  const rest  = regions.length - MAX_SHOW;
+  const rest = regions.length - MAX_SHOW;
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
       <span className="text-xs font-semibold text-slate-700 shrink-0">
@@ -951,11 +944,11 @@ function RegionChips({ account }) {
 function SummaryCards({ accounts }) {
   const agg = accounts.reduce((acc, a) => {
     const s = normalizeScanSummary(a.lastScanSummary) || {};
-    acc.EOL              += s.EOL              || 0;
-    acc.EXPIRING_SOON    += s.EXPIRING_SOON    || 0;
+    acc.EOL += s.EOL || 0;
+    acc.EXPIRING_SOON += s.EXPIRING_SOON || 0;
     acc.EXTENDED_SUPPORT += s.EXTENDED_SUPPORT || 0;
-    acc.SUPPORTED        += s.SUPPORTED        || 0;
-    acc.UNKNOWN          += s.UNKNOWN          || 0;
+    acc.SUPPORTED += s.SUPPORTED || 0;
+    acc.UNKNOWN += s.UNKNOWN || 0;
     return acc;
   }, { EOL: 0, EXPIRING_SOON: 0, EXTENDED_SUPPORT: 0, SUPPORTED: 0, UNKNOWN: 0 });
 
@@ -1010,15 +1003,15 @@ function SummaryCards({ accounts }) {
 }
 
 function AccountScanCard({ account, isScanning, onViewResults, onRescan, onEditRegions, onDelete }) {
-  const sum   = normalizeScanSummary(account.lastScanSummary);
+  const sum = normalizeScanSummary(account.lastScanSummary);
   const total = sum ? (sum.total || 0) : 0;
 
   const lastScanLabel = account.lastScanAt
     ? new Date(account.lastScanAt).toLocaleString("en-GB", {
-        day: "2-digit", month: "short", year: "numeric",
-        hour: "2-digit", minute: "2-digit",
-        timeZone: "UTC",
-      }) + " UTC"
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+      timeZone: "UTC",
+    }) + " UTC"
     : "Never";
 
   const btnLabel = isScanning ? "Scanning…" : account.lastScanAt ? "Run Scan Again" : "Run First Scan";
@@ -1192,9 +1185,9 @@ function EditRegionsModal({ account, onSave, onCancel }) {
     : (account.selectedRegions || []);
 
   const [regionMode, setRegionMode] = useState(initMode);
-  const [single, setSingle]         = useState(initSingle);
-  const [selected, setSelected]     = useState(initSelected);
-  const [saving, setSaving]         = useState(false);
+  const [single, setSingle] = useState(initSingle);
+  const [selected, setSelected] = useState(initSelected);
+  const [saving, setSaving] = useState(false);
 
   function toggle(r) {
     setSelected(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]);
@@ -1206,8 +1199,8 @@ function EditRegionsModal({ account, onSave, onCancel }) {
     const patch = regionMode === "all"
       ? { regions: [], scanAllRegions: true }
       : regionMode === "single"
-      ? { regions: [single].filter(Boolean), scanAllRegions: false }
-      : { regions: selected, scanAllRegions: false };
+        ? { regions: [single].filter(Boolean), scanAllRegions: false }
+        : { regions: selected, scanAllRegions: false };
     try {
       await Promise.resolve(onSave(patch));
     } finally {
@@ -1240,18 +1233,17 @@ function EditRegionsModal({ account, onSave, onCancel }) {
 
         <div className="mx-6 grid grid-cols-3 gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
           {[
-            { v: "all",      label: "All regions"    },
-            { v: "single",   label: "Single region"  },
+            { v: "all", label: "All regions" },
+            { v: "single", label: "Single region" },
             { v: "selected", label: "Select regions" },
           ].map(o => (
             <button key={o.v}
               type="button"
               onClick={() => { setRegionMode(o.v); setSelected([]); }}
-              className={`h-11 rounded-lg px-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-300 ${
-                regionMode === o.v
-                  ? "bg-slate-950 text-white shadow-sm"
-                  : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}>
+              className={`h-11 rounded-lg px-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-300 ${regionMode === o.v
+                ? "bg-slate-950 text-white shadow-sm"
+                : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}>
               {o.label}
             </button>
           ))}
@@ -1275,15 +1267,13 @@ function EditRegionsModal({ account, onSave, onCancel }) {
                       key={r.value}
                       type="button"
                       onClick={() => setSingle(r.value)}
-                      className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-300 ${
-                        checked
-                          ? "border-indigo-200 bg-indigo-50"
-                          : "border-slate-200 bg-white hover:bg-slate-50"
-                      }`}
+                      className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-300 ${checked
+                        ? "border-indigo-200 bg-indigo-50"
+                        : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
                     >
-                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                        checked ? "border-indigo-600 bg-indigo-600 text-white" : "border-slate-300 bg-white"
-                      }`}>
+                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${checked ? "border-indigo-600 bg-indigo-600 text-white" : "border-slate-300 bg-white"
+                        }`}>
                         {checked && <Check size={11} strokeWidth={3} />}
                       </span>
                       <span className="min-w-0 flex-1">
@@ -1308,9 +1298,8 @@ function EditRegionsModal({ account, onSave, onCancel }) {
                     <button key={r.value}
                       type="button"
                       onClick={() => toggle(r.value)}
-                      className={`flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-300 ${
-                        checked ? "border-indigo-200 bg-indigo-50" : "border-slate-200 bg-white hover:bg-slate-50"
-                      }`}>
+                      className={`flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-300 ${checked ? "border-indigo-200 bg-indigo-50" : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}>
                       <input type="checkbox" checked={checked} readOnly
                         className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-indigo-600" />
                       <span className="min-w-0">
@@ -1430,17 +1419,17 @@ export default function AccountScanPage() {
   const navigate = useNavigate();
   const _memberSession = hasMemberSession();
   const canAdmin = !_memberSession || getMemberRole() === "ADMIN";
-  const [pageMode, setPageMode]         = useState("list");
+  const [pageMode, setPageMode] = useState("list");
   // Sync init from localStorage so the list is never empty on the first paint
-  const [accounts, setAccounts]         = useState(() => {
+  const [accounts, setAccounts] = useState(() => {
     const list = loadAccounts();
     return !list.length && isDemoEnabled() ? MOCK_CONNECTED_ACCOUNTS : list;
   });
   const [bootstrapping, setBootstrapping] = useState(true);
-  const [scanningIds, setScanningIds]   = useState(new Set());
+  const [scanningIds, setScanningIds] = useState(new Set());
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [editTarget, setEditTarget]     = useState(null);
-  const [toast, setToast]               = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
+  const [toast, setToast] = useState(null);
 
   function refreshAccounts() { setAccounts(loadAccounts()); }
 
@@ -1492,22 +1481,22 @@ export default function AccountScanPage() {
     const regionPayload = form.regions === "all"
       ? { regions: [], scanAllRegions: true }
       : form.regions === "single"
-      ? { regions: [form.singleRegion].filter(Boolean), scanAllRegions: false }
-      : { regions: form.selectedRegions, scanAllRegions: false };
+        ? { regions: [form.singleRegion].filter(Boolean), scanAllRegions: false }
+        : { regions: form.selectedRegions, scanAllRegions: false };
 
     const account = addAccount({
-      accountId:   form.accountId,
+      accountId: form.accountId,
       accountName: form.accountName,
-      roleArn:     form.roleArn,
-      externalId:  externalId,
+      roleArn: form.roleArn,
+      externalId: externalId,
       ...regionPayload,
     });
 
     let finalAccount = account;
     if (isDemoEnabled()) {
       const patch = {
-        lastScanAt:      new Date().toISOString(),
-        lastScanStatus:  "success",
+        lastScanAt: new Date().toISOString(),
+        lastScanStatus: "success",
         lastScanSummary: DEMO_SCAN_RESULT,
       };
       updateAccount(account.id, patch);
@@ -1687,13 +1676,12 @@ export default function AccountScanPage() {
       )}
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ring-1 ${
-          toast.type === "success"
-            ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
-            : toast.type === "info"
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ring-1 ${toast.type === "success"
+          ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
+          : toast.type === "info"
             ? "bg-blue-50 text-blue-800 ring-blue-200"
             : "bg-red-50 text-red-800 ring-red-200"
-        }`}>
+          }`}>
           <span>{toast.msg}</span>
           <button onClick={() => setToast(null)} className="ml-1 opacity-60 hover:opacity-100 text-base leading-none">×</button>
         </div>

@@ -141,4 +141,11 @@ if __name__ == "__main__":
 ║    curl -X POST http://localhost:{PORT}/eol/general/refresh ║
 ╚══════════════════════════════════════════════════════╝
 """)
+    # Start SNS alert scheduler (no-op unless SNS_ALERTS_ENABLED=true)
+    try:
+        import alert_scheduler
+        alert_scheduler.start_scheduler()
+    except Exception as _sched_exc:
+        logger.warning("Could not start alert scheduler: %s", _sched_exc)
+
     app.run(host="0.0.0.0", port=PORT, debug=False)

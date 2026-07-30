@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Settings2, Bell, Clock, Target, Cloud, Info, AlertTriangle, Check, KeyRound, Copy, Users, RefreshCw, X, Mail, Hash, ChevronRight, Loader, Download, UserPlus, ShieldCheck } from "lucide-react";
+import { Settings2, Bell, Clock, Target, Cloud, Info, AlertTriangle, Check, KeyRound, Copy, Users, RefreshCw, X, Mail, Hash, ChevronRight, Loader, Download, UserPlus, ShieldCheck, Send, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useConfig, useSaveConfig } from "../hooks/useConfig";
 import {
@@ -9,6 +9,13 @@ import {
   useSendTestNotification,
   useNotificationLogs,
 } from "../hooks/useNotifications";
+import {
+  useSnsSubscriptions,
+  useSubscribeEmail,
+  useUnsubscribeEmail,
+  useSendTestAlert,
+  useTriggerEmailAlert,
+} from "../hooks/useSnsSubscriptions";
 import {
   useApiTokens,
   useCreateApiToken,
@@ -488,6 +495,224 @@ function NotifySection() {
           </div>
         </div>
       )}
+
+      {/* ── SNS Email Subscriptions ── */}
+      <SnsSubscriptionsCard />
+
+    </div>
+  );
+}
+
+
+// ── SNS Email Subscriptions Card ──────────────────────────────────────────────
+
+function SnsSubscriptionsCard() {
+  const { data, isLoading, refetch } = useSnsSubscriptions();
+  const subscribe    = useSubscribeEmail();
+  const unsubscribe  = useUnsubscribeEmail();
+  const sendTest     = useSendTestAlert();
+  const triggerAlert = useTriggerEmailAlert();
+
+  const [emailInput, setEmailInput] = useState("");
+  const [subErr,     setSubErr]     = useState("");
+  const [subOk,      setSubOk]      = useState("");
+  const [testState,  setTestState]  = useState({ loading: false, ok: false, err: "" });
+  const [dispState,  setDispState]  = useState({ loading: false, ok: false, err: "" });
+
+  const subscriptions = data?.subscriptions ?? [];
+  const hasVerified   = subscriptions.some(s => s.status === "VERIFIED");
+
+  async function handleSubscribe(e) {
+    e.preventDefault();
+    setSubErr(""); setSubOk("");
+    const email = emailInput.trim();
+    if (!email) return;
+    try {
+      const r = await subscribe.mutateAsync({ email });
+      setSubOk(r.message || "Confirmation email sent — check your inbox.");
+      setEmailInput("");
+    } catch (ex) {
+      setSubErr(ex.message || "Failed to subscribe.");
+    }
+  }
+
+  async function handleUnsubscribe(subId) {
+    try {
+      await unsubscribe.mutateAsync({ subId });
+    } catch (ex) {
+      alert(ex.message || "Failed to unsubscribe.");
+    }
+  }
+
+  async function handleTest() {
+    setTestState({ loading: true, ok: false, err: "" });
+    try {
+      await sendTest.mutateAsync();
+      setTestState({ loading: false, ok: true, err: "" });
+      setTimeout(() => setTestState({ loading: false, ok: false, err: "" }), 4000);
+    } catch (ex) {
+      setTestState({ loading: false, ok: false, err: ex.message || "Test failed." });
+    }
+  }
+
+  async function handleDispatch() {
+    setDispState({ loading: true, ok: false, err: "" });
+    try {
+      const r = await triggerAlert.mutateAsync();
+      setDispState({ loading: false, ok: true, err: "" });
+      refetch();
+      setTimeout(() => setDispState({ loading: false, ok: false, err: "" }), 4000);
+    } catch (ex) {
+      setDispState({ loading: false, ok: false, err: ex.message || "Dispatch failed." });
+    }
+  }
+
+  function statusBadge(status) {
+    const cfg = {
+      VERIFIED:     "bg-emerald-50 text-emerald-700",
+      PENDING:      "bg-amber-50  text-amber-700",
+      UNSUBSCRIBED: "bg-slate-100 text-slate-500",
+    }[status] || "bg-slate-100 text-slate-500";
+    return (
+      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${cfg}`}>
+        {status === "VERIFIED"     && <Check size={9} strokeWidth={3} />}
+        {status}
+      </span>
+    );
+  }
+
+  return (
+    <div className="mt-8">
+      {/* Header */}
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50">
+          <Bell size={14} className="text-rose-500" strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-slate-900">SNS Email Alert Subscriptions</p>
+          <p className="text-xs text-slate-500">Receive AWS SNS email alerts for HIGH &amp; MEDIUM severity EOL resources</p>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+
+        {/* Subscribe form */}
+        <div className="px-4 py-4 border-b border-slate-100">
+          <form onSubmit={handleSubscribe} className="flex gap-2 items-start">
+            <div className="flex-1">
+              <input
+                id="sns-email-input"
+                type="email"
+                placeholder="Enter email address to subscribe"
+                value={emailInput}
+                onChange={e => setEmailInput(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300/50 focus:border-indigo-300"
+              />
+            </div>
+            <button
+              id="sns-subscribe-btn"
+              type="submit"
+              disabled={subscribe.isPending || !emailInput.trim()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-50 transition-colors whitespace-nowrap"
+            >
+              {subscribe.isPending
+                ? <><Loader size={12} className="animate-spin" /> Subscribing…</>
+                : <><Mail size={12} strokeWidth={2} /> Subscribe</>}
+            </button>
+          </form>
+          {subOk  && <p className="mt-2 text-xs text-emerald-600 font-semibold flex items-center gap-1"><Check size={11} strokeWidth={2.5} />{subOk}</p>}
+          {subErr && <p className="mt-2 text-xs text-red-500">{subErr}</p>}
+
+          {/* Pending info banner */}
+          {subscriptions.some(s => s.status === "PENDING") && (
+            <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+              <AlertTriangle size={13} className="text-amber-600 mt-0.5 shrink-0" strokeWidth={2} />
+              <p className="text-xs text-amber-700">
+                <strong>Pending confirmation:</strong> Check your inbox for an AWS confirmation email and click <em>"Confirm subscription"</em> to activate alerts.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Subscriber list */}
+        {isLoading ? (
+          <div className="px-4 py-4">
+            <div className="animate-pulse space-y-2">
+              <div className="h-8 rounded bg-slate-100" />
+              <div className="h-8 rounded bg-slate-100" />
+            </div>
+          </div>
+        ) : subscriptions.length === 0 ? (
+          <div className="px-4 py-6 text-center">
+            <Mail size={24} className="mx-auto text-slate-300 mb-2" strokeWidth={1.5} />
+            <p className="text-sm text-slate-400">No subscribers yet. Add an email above.</p>
+          </div>
+        ) : (
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50">
+                <th className="px-3 py-2 text-left font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                <th className="px-3 py-2 text-left font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="px-3 py-2 text-left font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Subscribed</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody>
+              {subscriptions.map(sub => (
+                <tr key={sub.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                  <td className="px-3 py-2.5 font-mono text-slate-700">{sub.email}</td>
+                  <td className="px-3 py-2.5">{statusBadge(sub.status)}</td>
+                  <td className="px-3 py-2.5 text-slate-400 hidden sm:table-cell">
+                    {sub.created_at ? new Date(sub.created_at).toLocaleDateString() : "—"}
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    {sub.status !== "UNSUBSCRIBED" && (
+                      <button
+                        id={`sns-unsub-${sub.id}`}
+                        onClick={() => handleUnsubscribe(sub.id)}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        title="Unsubscribe"
+                      >
+                        <Trash2 size={10} strokeWidth={2} /> Remove
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Actions footer */}
+        {hasVerified && (
+          <div className="px-4 py-3 border-t border-slate-100 bg-slate-50 flex flex-wrap gap-2">
+            <button
+              id="sns-test-btn"
+              onClick={handleTest}
+              disabled={testState.loading}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50 transition-colors"
+            >
+              {testState.loading
+                ? <><Loader size={11} className="animate-spin" /> Sending…</>
+                : <><Mail size={11} strokeWidth={2} /> Send test email</>}
+            </button>
+            <button
+              id="sns-dispatch-btn"
+              onClick={handleDispatch}
+              disabled={dispState.loading}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 transition-colors"
+            >
+              {dispState.loading
+                ? <><Loader size={11} className="animate-spin" /> Dispatching…</>
+                : <><Send size={11} strokeWidth={2} /> Dispatch alerts now</>}
+            </button>
+            {testState.ok   && <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1"><Check size={11} strokeWidth={2.5} /> Test sent!</span>}
+            {testState.err  && <span className="text-xs text-red-500">{testState.err}</span>}
+            {dispState.ok   && <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1"><Check size={11} strokeWidth={2.5} /> Alerts dispatched!</span>}
+            {dispState.err  && <span className="text-xs text-red-500">{dispState.err}</span>}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

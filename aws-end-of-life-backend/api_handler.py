@@ -4151,6 +4151,188 @@ def handle_ws_notifications_logs(workspace_id: str, headers: dict, params: dict)
     return resp(200, {"logs": logs, "count": len(logs)})
 
 
+# ── SNS Email Alert Subscription Handlers ─────────────────────────────────────
+
+def handle_ws_sns_subscriptions_list(workspace_id: str, headers: dict) -> dict:
+    """GET /workspaces/:wsId/alerts/email-subscriptions — list all subscriptions."""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "VIEWER")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+    subs = get_storage().get_sns_subscriptions(workspace_id)
+    # Never expose topic/subscription ARNs to frontend
+    safe_subs = [_safe_sns_sub(s) for s in subs]
+    return resp(200, {"subscriptions": safe_subs, "count": len(safe_subs)})
+
+
+def handle_ws_sns_subscribe(workspace_id: str, body: dict, headers: dict) -> dict:
+    """POST /workspaces/:wsId/alerts/email-subscriptions — subscribe an email."""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+
+    email = (body.get("email") or "").strip().lower()
+    from sns_subscriptions import validate_email, make_subscription, STATUS_PENDING
+    if not validate_email(email):
+        return _error_resp(400, "INVALID_EMAIL", "Please enter a valid email address")
+
+    storage = get_storage()
+    # Check for duplicate
+    existing = [s for s in storage.get_sns_subscriptions(workspace_id)
+                if s.get("email") == email and s.get("status") != "UNSUBSCRIBED"]
+    if existing:
+        sub = existing[0]
+        if sub.get("status") == STATUS_PENDING:
+            return _error_resp(409, "SUBSCRIPTION_PENDING",
+                               "A confirmation email was already sent. Check your inbox.")
+        return _error_resp(409, "ALREADY_SUBSCRIBED", "This email is already subscribed.")
+
+    try:
+        import sns_service
+        topic_arn = sns_service.create_or_get_topic(workspace_id)
+        sub_arn   = sns_service.subscribe_email(topic_arn, email)
+    except RuntimeError as exc:
+        return _error_resp(503, "SNS_UNAVAILABLE", str(exc))
+    except Exception as exc:
+        logger.error("SNS subscribe failed: %s", exc)
+        code = "SNS_ACCESS_DENIED" if "AccessDenied" in str(exc) else "SNS_ERROR"
+        return _error_resp(502, code, f"Could not subscribe: {str(exc)[:200]}")
+
+    sub = make_subscription(workspace_id, email, topic_arn, sub_arn)
+    storage.save_sns_subscription(sub)
+    logger.info("SNS subscription created email=%s workspace=%s", email, workspace_id)
+    return resp(201, {
+        "ok":           True,
+        "subscription": _safe_sns_sub(sub),
+        "message":      "Confirmation email sent — check your inbox and click 'Confirm subscription'.",
+    })
+
+
+def handle_ws_sns_verify(workspace_id: str, body: dict, headers: dict) -> dict:
+    """
+    POST /workspaces/:wsId/alerts/email-subscriptions/verify
+    Confirm an SNS subscription using the token from the AWS confirmation email.
+    Body: {sub_id, token}
+    """
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+
+    sub_id = body.get("sub_id") or body.get("subId") or ""
+    token  = (body.get("token") or "").strip()
+
+    if not sub_id or not token:
+        return _error_resp(400, "MISSING_FIELDS", "sub_id and token are required")
+
+    storage = get_storage()
+    subs    = storage.get_sns_subscriptions(workspace_id)
+    sub     = next((s for s in subs if s.get("id") == sub_id), None)
+    if not sub:
+        return _error_resp(404, "SUBSCRIPTION_NOT_FOUND", "Subscription not found")
+
+    topic_arn = sub.get("topic_arn", "")
+    try:
+        import sns_service
+        confirmed_arn = sns_service.confirm_subscription(topic_arn, token)
+    except Exception as exc:
+        logger.error("SNS confirm failed: %s", exc)
+        return _error_resp(502, "SNS_CONFIRM_FAILED",
+                           "Confirmation failed — the token may have expired. Please re-subscribe.")
+
+    from sns_subscriptions import update_subscription_status, STATUS_VERIFIED
+    updated = update_subscription_status(sub, STATUS_VERIFIED, confirmed_arn)
+    storage.save_sns_subscription(updated)
+    logger.info("SNS subscription verified sub_id=%s workspace=%s", sub_id, workspace_id)
+    return resp(200, {"ok": True, "subscription": _safe_sns_sub(updated)})
+
+
+def handle_ws_sns_unsubscribe(workspace_id: str, sub_id: str, headers: dict) -> dict:
+    """DELETE /workspaces/:wsId/alerts/email-subscriptions/:subId"""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+
+    storage = get_storage()
+    subs    = storage.get_sns_subscriptions(workspace_id)
+    sub     = next((s for s in subs if s.get("id") == sub_id), None)
+    if not sub:
+        return _error_resp(404, "SUBSCRIPTION_NOT_FOUND", "Subscription not found")
+
+    sub_arn = sub.get("subscription_arn", "")
+    try:
+        import sns_service
+        sns_service.unsubscribe(sub_arn)
+    except Exception as exc:
+        logger.warning("SNS unsubscribe API call failed (still removing locally): %s", exc)
+
+    from sns_subscriptions import update_subscription_status, STATUS_UNSUBSCRIBED
+    updated = update_subscription_status(sub, STATUS_UNSUBSCRIBED, "")
+    storage.save_sns_subscription(updated)
+    logger.info("SNS unsubscribed sub_id=%s workspace=%s", sub_id, workspace_id)
+    return resp(200, {"ok": True, "message": "Unsubscribed successfully."})
+
+
+def handle_ws_sns_history(workspace_id: str, headers: dict, params: dict) -> dict:
+    """GET /workspaces/:wsId/alerts/email-notifications/history"""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "VIEWER")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+    limit   = min(int(params.get("limit", 50)), 200)
+    history = get_storage().get_sns_notification_history(workspace_id, limit=limit)
+    return resp(200, {"history": history, "count": len(history)})
+
+
+def handle_ws_sns_dispatch(workspace_id: str, headers: dict) -> dict:
+    """POST /workspaces/:wsId/alerts/email-notify — manually trigger alert dispatch."""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+
+    ws_name = ws.get("name") or workspace_id
+    try:
+        import sns_alert_handler
+        result = sns_alert_handler.evaluate_and_dispatch(workspace_id, ws_name)
+        return resp(200, {"ok": True, **result})
+    except Exception as exc:
+        logger.error("Manual SNS dispatch failed workspace=%s: %s", workspace_id, exc)
+        return _error_resp(502, "DISPATCH_FAILED", f"Dispatch failed: {str(exc)[:200]}")
+
+
+def handle_ws_sns_test(workspace_id: str, headers: dict) -> dict:
+    """POST /workspaces/:wsId/alerts/email-test — send test email via SNS."""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+
+    storage = get_storage()
+    subs    = [s for s in storage.get_sns_subscriptions(workspace_id)
+               if s.get("status") == "VERIFIED"]
+    if not subs:
+        return _error_resp(400, "NO_VERIFIED_SUBSCRIBERS",
+                           "No verified subscribers. Subscribe and confirm an email first.")
+
+    topic_arn = subs[0].get("topic_arn", "")
+    ws_name   = ws.get("name") or workspace_id
+    try:
+        import sns_alert_handler
+        result = sns_alert_handler.send_test_alert(workspace_id, ws_name, topic_arn)
+        return resp(200, result)
+    except Exception as exc:
+        logger.error("SNS test alert failed workspace=%s: %s", workspace_id, exc)
+        return _error_resp(502, "TEST_FAILED", f"Test alert failed: {str(exc)[:200]}")
+
+
+def _safe_sns_sub(sub: dict) -> dict:
+    """Strip sensitive ARN fields before returning to the frontend."""
+    return {
+        "id":         sub.get("id"),
+        "email":      sub.get("email"),
+        "status":     sub.get("status"),
+        "created_at": sub.get("created_at"),
+        "updated_at": sub.get("updated_at"),
+    }
+
+
+
 def handle_admin_weekly_digest(headers: dict) -> dict:
     if not _verify_admin(headers):
         return _error_resp(401, "ADMIN_TOKEN_INVALID", "Admin token required")
@@ -4754,6 +4936,41 @@ def lambda_handler(event, context):
     m = re.fullmatch(r"/workspaces/([^/]+)/alerts/([^/]+)/(acknowledge|snooze|resolve|reopen)", path)
     if m and method == "POST":
         return handle_ws_alert_action(m.group(1), m.group(2), m.group(3), body, headers)
+
+    # ── SNS Email Alert Subscription routes ───────────────────────────────────
+
+    # GET/POST /workspaces/:wsId/alerts/email-subscriptions
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-subscriptions", path)
+    if m:
+        if method == "GET":  return handle_ws_sns_subscriptions_list(m.group(1), headers)
+        if method == "POST": return handle_ws_sns_subscribe(m.group(1), body, headers)
+
+    # DELETE /workspaces/:wsId/alerts/email-subscriptions/:subId
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-subscriptions/([^/]+)", path)
+    if m and method == "DELETE":
+        return handle_ws_sns_unsubscribe(m.group(1), m.group(2), headers)
+
+    # POST /workspaces/:wsId/alerts/email-subscriptions/verify
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-subscriptions/verify", path)
+    if m and method == "POST":
+        return handle_ws_sns_verify(m.group(1), body, headers)
+
+    # GET /workspaces/:wsId/alerts/email-notifications/history
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-notifications/history", path)
+    if m and method == "GET":
+        return handle_ws_sns_history(m.group(1), headers, params)
+
+    # POST /workspaces/:wsId/alerts/email-notify  (manual dispatch trigger)
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-notify", path)
+    if m and method == "POST":
+        return handle_ws_sns_dispatch(m.group(1), headers)
+
+    # POST /workspaces/:wsId/alerts/email-test  (send test email)
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-test", path)
+    if m and method == "POST":
+        return handle_ws_sns_test(m.group(1), headers)
+
+
 
     # /workspaces/:wsId/scans/:scanId
     m = re.fullmatch(r"/workspaces/([^/]+)/scans/([^/]+)", path)
