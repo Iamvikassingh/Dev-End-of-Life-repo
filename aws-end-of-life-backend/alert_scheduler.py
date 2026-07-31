@@ -77,9 +77,13 @@ def _run_dispatch_cycle():
 
 def _scheduler_loop():
     logger.info(
-        "SNS alert scheduler started — interval=%.1f hours (%.0f seconds)",
+        "SNS alert scheduler started — interval=%.1f hours (%.0f seconds). Waiting 60s for cache warmup.",
         SCHEDULE_HOURS, SCHEDULE_SECONDS
     )
+    # Wait 60s before the very first run so that `warm_cache_background()`
+    # has time to fetch General EOL data from the internet.
+    _stop_event.wait(60)
+
     while not _stop_event.is_set():
         _run_dispatch_cycle()
         # Wait for the interval OR until stop is requested
