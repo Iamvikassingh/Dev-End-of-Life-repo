@@ -79,8 +79,11 @@ def topic_name_for_workspace(workspace_id: str) -> str:
 def create_or_get_topic(workspace_id: str) -> str:
     """
     Create an SNS topic for the workspace (idempotent — safe to call repeatedly).
+    Sets a Topic Policy that denies sns:Unsubscribe to everyone except the backend role.
     Returns the TopicArn.
     """
+    import json
+    import boto3
     name   = topic_name_for_workspace(workspace_id)
     client = _get_client()
     logger.info("SNS create_or_get_topic workspace=%s name=%s", workspace_id, name)
@@ -88,6 +91,58 @@ def create_or_get_topic(workspace_id: str) -> str:
         "DisplayName": f"EOL Monitor Alerts ({workspace_id[:20]})",
     })
     arn = response["TopicArn"]
+    
+    try:
+        sts = boto3.client("sts", region_name=AWS_REGION)
+        caller_arn = sts.get_caller_identity()["Arn"]
+        account_id = arn.split(":")[4]
+        
+        policy = {
+            "Version": "2008-10-17",
+            "Statement": [
+                {
+                    "Sid": "DefaultOwnerAccess",
+                    "Effect": "Allow",
+                    "Principal": {"AWS": "*"},
+                    "Action": [
+                        "SNS:GetTopicAttributes",
+                        "SNS:SetTopicAttributes",
+                        "SNS:AddPermission",
+                        "SNS:RemovePermission",
+                        "SNS:DeleteTopic",
+                        "SNS:Subscribe",
+                        "SNS:ListSubscriptionsByTopic",
+                        "SNS:Publish"
+                    ],
+                    "Resource": arn,
+                    "Condition": {
+                        "StringEquals": {
+                            "AWS:SourceOwner": account_id
+                        }
+                    }
+                },
+                {
+                    "Sid": "DenyPublicUnsubscribe",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": "SNS:Unsubscribe",
+                    "Resource": arn,
+                    "Condition": {
+                        "ArnNotEquals": {
+                            "aws:PrincipalArn": caller_arn
+                        }
+                    }
+                }
+            ]
+        }
+        _retry(client.set_topic_attributes,
+            TopicArn=arn,
+            AttributeName="Policy",
+            AttributeValue=json.dumps(policy)
+        )
+    except Exception as exc:
+        logger.error("Failed to attach SNS topic policy to %s: %s", arn, exc)
+
     logger.info("SNS topic ready: %s", arn)
     return arn
 

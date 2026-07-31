@@ -8,7 +8,10 @@
         "sns:CreateTopic",
         "sns:GetTopicAttributes",
         "sns:SetTopicAttributes",
-        "sns:ListTopics"
+        "sns:ListTopics",
+        "sns:DeleteTopic",
+        "sns:AddPermission",
+        "sns:RemovePermission"
       ],
       "Resource": "arn:aws:sns:*:*:eolm-ws-*",
       "Condition": {
