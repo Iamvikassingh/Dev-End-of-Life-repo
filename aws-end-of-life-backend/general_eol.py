@@ -30,9 +30,8 @@ _fetch_in_progress = False
 # Each entry maps an endoflife.date product slug → display metadata + known
 # recommended upgrades per version prefix.
 
-PRODUCTS: list[dict] = [
-    {
-        "slug": "aws-lambda",
+_PRODUCT_META_OVERRIDES: dict[str, dict] = {
+    "aws-lambda": {
         "service": "Lambda",
         "family": None,
         "upgrades": {
@@ -47,87 +46,72 @@ PRODUCTS: list[dict] = [
             "ruby3.2":    "ruby3.4",
         },
     },
-    {
-        "slug": "amazon-eks",
+    "amazon-eks": {
         "service": "EKS",
         "family": "EKS",
         "upgrades": {},
     },
-    {
-        "slug": "amazon-rds-mysql",
+    "amazon-rds-mysql": {
         "service": "RDS MySQL",
         "family": "MySQL",
         "upgrades": {"5.7": "8.4", "8.0": "8.4"},
     },
-    {
-        "slug": "amazon-rds-postgresql",
+    "amazon-rds-postgresql": {
         "service": "RDS PostgreSQL",
         "family": "PostgreSQL",
         "upgrades": {"11": "16", "12": "16", "13": "16"},
     },
-    {
-        "slug": "amazon-rds-mariadb",
+    "amazon-rds-mariadb": {
         "service": "RDS MariaDB",
         "family": "MariaDB",
         "upgrades": {},
     },
-    {
-        "slug": "amazon-aurora-postgresql",
+    "amazon-aurora-postgresql": {
         "service": "Aurora PostgreSQL",
         "family": "Aurora",
         "upgrades": {"13": "16", "14": "16"},
     },
-    {
-        "slug": "amazon-aurora-mysql",
+    "amazon-aurora-mysql": {
         "service": "Aurora MySQL",
         "family": "Aurora",
         "upgrades": {"2": "3"},
     },
-    {
-        "slug": "amazon-elasticache-redis",
+    "amazon-elasticache-redis": {
         "service": "ElastiCache Redis",
         "family": "Redis",
         "upgrades": {"5.0": "7.x", "6.0": "7.x", "6.2": "7.x"},
     },
-    {
-        "slug": "amazon-linux",
+    "amazon-linux": {
         "service": "Amazon Linux",
         "family": "Amazon Linux",
         "upgrades": {"1": "2023", "2": "2023"},
     },
-    {
-        "slug": "amazon-msk",
+    "amazon-msk": {
         "service": "MSK Kafka",
         "family": "Kafka",
         "upgrades": {"3.4": "3.7", "3.5": "3.7"},
     },
-    {
-        "slug": "amazon-opensearch",
+    "amazon-opensearch": {
         "service": "OpenSearch",
         "family": "OpenSearch",
         "upgrades": {"1.3": "2.x"},
     },
-    {
-        "slug": "amazon-documentdb",
+    "amazon-documentdb": {
         "service": "DocumentDB",
         "family": "DocumentDB",
         "upgrades": {},
     },
-    {
-        "slug": "amazon-neptune",
+    "amazon-neptune": {
         "service": "Neptune",
         "family": "Neptune",
         "upgrades": {},
     },
-    {
-        "slug": "amazon-glue",
+    "amazon-glue": {
         "service": "AWS Glue",
         "family": "Glue",
         "upgrades": {"2.0": "4.0", "3.0": "4.0"},
     },
-]
-
-_PRODUCT_BY_SLUG: dict[str, dict] = {p["slug"]: p for p in PRODUCTS}
+}
 
 
 # ── Official discovery integration ───────────────────────────────────────────
@@ -245,7 +229,7 @@ def _normalize(slug: str, raw: dict, fetched_at: Optional[str] = None,
     When discovery is provided (AWS docs/API result), its dates take precedence
     over endoflife.date and the source metadata reflects the official AWS source.
     """
-    meta    = _PRODUCT_BY_SLUG.get(slug, {})
+    meta    = _PRODUCT_META_OVERRIDES.get(slug, {})
     version = str(raw.get("cycle") or raw.get("version") or "").strip()
     if not version:
         return None
@@ -294,14 +278,19 @@ def _normalize(slug: str, raw: dict, fetched_at: Optional[str] = None,
     if not recommended and status in ("EOL", "EXPIRING_SOON"):
         recommended = recommended_latest
 
+    # Auto-generate a decent service name if not overridden (e.g., "amazon-cdk" -> "Amazon CDK")
+    default_service_name = slug.replace("-", " ").title().replace("Aws", "AWS")
+    service_name = meta.get("service", default_service_name)
+    family_name  = meta.get("family") or service_name.replace("Amazon ", "").replace("AWS ", "")
+
     return {
         "id":                 f"{slug}-{version}".replace(".", "_").replace("/", "-"),
-        "service":            meta.get("service", slug),
+        "service":            service_name,
         "version":            version,
         "eolDate":            primary_date,
         "daysToEol":          days,
         "status":             status,
-        "family":             meta.get("family"),
+        "family":             family_name,
         "recommendedUpgrade": recommended,
         "source":             "endoflife.date",
         "lifecycle_source":   lifecycle_source,
@@ -360,7 +349,7 @@ def merge_verified_lifecycle(records: list[dict], storage) -> tuple[list[dict], 
         )
         final_eol = eol_date if (support_end and eol_date and support_end != eol_date) else None
 
-        meta  = _PRODUCT_BY_SLUG.get(product, {})
+        meta  = _PRODUCT_META_OVERRIDES.get(product, {})
         patch = {
             "eolDate":            primary_date,
             "supportEndDate":     support_end,
@@ -403,7 +392,7 @@ def merge_verified_lifecycle(records: list[dict], storage) -> tuple[list[dict], 
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def fetch_all() -> list[dict]:
-    """Fetch and normalize all configured products from endoflife.date.
+    """Fetch and normalize all AWS-related products from endoflife.date dynamically.
 
     For products with official AWS discovery (Lambda, EKS), enriches source
     metadata and dates from AWS docs/API. A shared page cache ensures each
@@ -414,8 +403,23 @@ def fetch_all() -> list[dict]:
     _page_cache: dict = {}
     _http_get = _make_cached_http_get(_page_cache)
 
-    for product in PRODUCTS:
-        slug     = product["slug"]
+    try:
+        r = requests.get(f"{EOL_API_BASE}/all.json", timeout=15)
+        if r.status_code == 200:
+            all_slugs = r.json()
+        else:
+            logger.error("Failed to fetch /api/all.json from endoflife.date: HTTP %s", r.status_code)
+            all_slugs = []
+    except Exception as exc:
+        logger.error("Error fetching /api/all.json: %s", exc)
+        all_slugs = []
+
+    # Filter dynamically: only grab AWS/Amazon products
+    aws_slugs = [s for s in all_slugs if s.startswith("amazon-") or s.startswith("aws-")]
+
+    logger.info("endoflife.date: Found %d AWS-related products.", len(aws_slugs))
+
+    for slug in aws_slugs:
         versions = _fetch_product_versions(slug)
         logger.info("endoflife.date: %d cycles for %s", len(versions), slug)
         for raw in versions:
