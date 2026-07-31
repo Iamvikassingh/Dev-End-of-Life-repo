@@ -4308,6 +4308,22 @@ def handle_ws_sns_dispatch(workspace_id: str, headers: dict) -> dict:
         return _error_resp(502, "DISPATCH_FAILED", f"Dispatch failed: {str(exc)[:200]}")
 
 
+def handle_ws_sns_general_eol_notify(workspace_id: str, headers: dict) -> dict:
+    """POST /workspaces/:wsId/alerts/general-eol-notify — send General EOL digest."""
+    ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
+    if not ws:
+        return _error_resp(401, err_code, "Workspace authentication failed")
+
+    ws_name = ws.get("name") or workspace_id
+    try:
+        import sns_alert_handler
+        result = sns_alert_handler.dispatch_general_eol_digest(workspace_id, ws_name)
+        return resp(200, {"ok": True, **result})
+    except Exception as exc:
+        logger.error("General EOL digest failed workspace=%s: %s", workspace_id, exc)
+        return _error_resp(502, "DISPATCH_FAILED", f"General EOL digest failed: {str(exc)[:200]}")
+
+
 def handle_ws_sns_test(workspace_id: str, headers: dict) -> dict:
     """POST /workspaces/:wsId/alerts/email-test — send test email via SNS."""
     ws, actor, err_code = _verify_workspace_access(workspace_id, headers, "EDITOR")
@@ -4975,6 +4991,11 @@ def lambda_handler(event, context):
     m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-notify", path)
     if m and method == "POST":
         return handle_ws_sns_dispatch(m.group(1), headers)
+
+    # POST /workspaces/:wsId/alerts/general-eol-notify  (general EOL digest)
+    m = re.fullmatch(r"/workspaces/([^/]+)/alerts/general-eol-notify", path)
+    if m and method == "POST":
+        return handle_ws_sns_general_eol_notify(m.group(1), headers)
 
     # POST /workspaces/:wsId/alerts/email-test  (send test email)
     m = re.fullmatch(r"/workspaces/([^/]+)/alerts/email-test", path)

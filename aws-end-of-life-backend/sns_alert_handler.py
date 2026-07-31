@@ -393,3 +393,322 @@ def send_test_alert(workspace_id: str, workspace_name: str, topic_arn: str) -> d
 
     msg_id = sns_service.publish_alert(topic_arn, subject, html_body, text_body)
     return {"success": True, "messageId": msg_id}
+
+
+# ── General EOL Digest ────────────────────────────────────────────────────────
+
+def _build_general_eol_digest_html(
+    eol_records: list[dict],
+    expiring_records: list[dict],
+    workspace_name: str,
+) -> tuple[str, str, str]:
+    """Build a professional digest email with all EOL and Expiring Soon resources.
+
+    Returns (subject, html_body, text_body).
+    """
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    eol_count = len(eol_records)
+    exp_count = len(expiring_records)
+    total = eol_count + exp_count
+
+    subject = (
+        f"[EOL Digest] {eol_count} EOL, {exp_count} Expiring Soon — "
+        f"AWS EOL Monitor | {workspace_name}"
+    )
+
+    dashboard_link = f"{APP_URL}/general-eol" if APP_URL else "#"
+
+    # ── Build table rows ──────────────────────────────────────────────
+    def _table_row(rec: dict, is_eol: bool) -> str:
+        service = rec.get("service") or rec.get("service_type") or "—"
+        version = rec.get("version") or "—"
+        eol_date = rec.get("eolDate") or rec.get("eol_date") or "—"
+        days = rec.get("daysToEol") if rec.get("daysToEol") is not None else rec.get("days_to_eol")
+
+        if days is not None and int(days) < 0:
+            days_label = f"{abs(int(days))}d past EOL"
+            days_color = "#dc2626"
+        elif days is not None and int(days) == 0:
+            days_label = "Today"
+            days_color = "#dc2626"
+        elif days is not None:
+            days_label = f"{int(days)}d left"
+            days_color = "#d97706" if int(days) <= 90 else "#16a34a"
+        else:
+            days_label = "—"
+            days_color = "#64748b"
+
+        status_label = "EOL" if is_eol else "Expiring Soon"
+        status_bg = "#fef2f2" if is_eol else "#fffbeb"
+        status_color = "#dc2626" if is_eol else "#d97706"
+
+        return (
+            f'<tr style="border-bottom:1px solid #f1f5f9;">'
+            f'<td style="padding:8px 12px;font-size:13px;color:#1e293b;font-weight:600;">{service}</td>'
+            f'<td style="padding:8px 12px;font-size:13px;color:#334155;font-family:monospace;">{version}</td>'
+            f'<td style="padding:8px 12px;font-size:12px;color:#64748b;">{eol_date}</td>'
+            f'<td style="padding:8px 12px;font-size:12px;color:{days_color};font-weight:700;">{days_label}</td>'
+            f'<td style="padding:8px 12px;">'
+            f'<span style="display:inline-block;background:{status_bg};color:{status_color};'
+            f'font-size:10px;font-weight:800;padding:3px 8px;border-radius:12px;'
+            f'text-transform:uppercase;letter-spacing:.04em;">{status_label}</span></td>'
+            f'</tr>'
+        )
+
+    # Group: EOL first, then Expiring Soon — sorted by days ascending
+    all_rows = []
+    for rec in sorted(eol_records, key=lambda r: abs(r.get("daysToEol") or r.get("days_to_eol") or 0)):
+        all_rows.append(_table_row(rec, is_eol=True))
+    for rec in sorted(expiring_records, key=lambda r: r.get("daysToEol") or r.get("days_to_eol") or 0):
+        all_rows.append(_table_row(rec, is_eol=False))
+
+    # Limit to 50 rows to stay within SNS message size limits
+    shown = all_rows[:50]
+    overflow = total - len(shown)
+    overflow_row = ""
+    if overflow > 0:
+        overflow_row = (
+            f'<tr><td colspan="5" style="padding:10px 12px;text-align:center;'
+            f'font-size:12px;color:#6366f1;font-weight:600;">'
+            f'…and {overflow} more. <a href="{dashboard_link}" style="color:#6366f1;">'
+            f'View all →</a></td></tr>'
+        )
+
+    table_html = "\n".join(shown) + overflow_row
+
+    html_body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS EOL Digest — {workspace_name}</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="640" cellpadding="0" cellspacing="0"
+             style="max-width:640px;width:100%;background:#ffffff;border-radius:16px;
+                    border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#0f172a;padding:24px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <p style="margin:0;font-size:18px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;">
+                    AWS EOL Monitor
+                  </p>
+                  <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;">General Lifecycle Digest</p>
+                </td>
+                <td align="right">
+                  <span style="display:inline-block;background:#312e81;color:#a5b4fc;
+                               font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;
+                               text-transform:uppercase;letter-spacing:.05em;">Digest</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Summary Banner -->
+        <tr>
+          <td style="padding:24px 32px;border-bottom:1px solid #e2e8f0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td width="50%" style="padding-right:8px;">
+                  <div style="background:#fef2f2;border-radius:12px;padding:16px;text-align:center;">
+                    <p style="margin:0;font-size:28px;font-weight:900;color:#dc2626;">{eol_count}</p>
+                    <p style="margin:4px 0 0;font-size:11px;color:#991b1b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">End of Life</p>
+                  </div>
+                </td>
+                <td width="50%" style="padding-left:8px;">
+                  <div style="background:#fffbeb;border-radius:12px;padding:16px;text-align:center;">
+                    <p style="margin:0;font-size:28px;font-weight:900;color:#d97706;">{exp_count}</p>
+                    <p style="margin:4px 0 0;font-size:11px;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Expiring Soon</p>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:16px 0 0;font-size:13px;color:#64748b;text-align:center;">
+              {total} AWS services require attention based on public lifecycle data from
+              <a href="https://endoflife.date" style="color:#6366f1;text-decoration:none;font-weight:600;">endoflife.date</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Resource Table -->
+        <tr>
+          <td style="padding:0;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                <th style="padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Service</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Version</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">EOL Date</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Days</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+              </tr>
+              {table_html}
+            </table>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:24px 32px;text-align:center;">
+            <a href="{dashboard_link}" style="display:inline-block;background:#6366f1;color:#fff;text-decoration:none;
+               font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;">
+              View Full EOL Dashboard &rarr;
+            </a>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 32px;">
+            <p style="margin:0;font-size:11px;color:#94a3b8;text-align:center;">
+              Workspace: <strong>{workspace_name}</strong> &bull; Generated {now}
+            </p>
+            <p style="margin:4px 0 0;font-size:10px;color:#cbd5e1;text-align:center;">
+              Data source: endoflife.date &bull; To unsubscribe, visit
+              <a href="{APP_URL}/settings" style="color:#94a3b8;">Settings</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+    # ── Text fallback ─────────────────────────────────────────────────
+    text_lines = [
+        f"AWS EOL Monitor — General Lifecycle Digest",
+        f"Workspace: {workspace_name}",
+        f"Generated: {now}",
+        f"",
+        f"Summary: {eol_count} EOL, {exp_count} Expiring Soon",
+        f"{'=' * 60}",
+        f"",
+    ]
+    for rec in eol_records[:30]:
+        svc = rec.get("service") or "—"
+        ver = rec.get("version") or "—"
+        eol_d = rec.get("eolDate") or "—"
+        text_lines.append(f"  [EOL]           {svc:20s} {ver:12s} EOL: {eol_d}")
+    for rec in expiring_records[:30]:
+        svc = rec.get("service") or "—"
+        ver = rec.get("version") or "—"
+        eol_d = rec.get("eolDate") or "—"
+        days = rec.get("daysToEol")
+        text_lines.append(f"  [EXPIRING SOON] {svc:20s} {ver:12s} EOL: {eol_d}  ({days}d)")
+    text_lines.append(f"")
+    text_lines.append(f"View full dashboard: {dashboard_link}")
+
+    text_body = "\n".join(text_lines)
+
+    return subject, html_body, text_body
+
+
+def dispatch_general_eol_digest(
+    workspace_id: str,
+    workspace_name: str = "",
+    dry_run: bool = False,
+) -> dict:
+    """Dispatch a General EOL digest email to all VERIFIED subscribers.
+
+    Reads cached General EOL data, filters EOL + EXPIRING_SOON records,
+    builds a digest email, and publishes once via SNS.
+    Deduplicates via a content hash stored in notification history.
+
+    Returns {dispatched, skipped_dedup, skipped_no_subs, skipped_empty, errors}.
+    """
+    import hashlib
+    from storage import get_storage
+    from sns_subscriptions import make_notification_history
+    import general_eol as _general_eol
+
+    storage = get_storage()
+
+    # 1. Check subscribers
+    subs = [s for s in storage.get_sns_subscriptions(workspace_id)
+            if s.get("status") == "VERIFIED"]
+    if not subs:
+        logger.info("General EOL digest ws=%s — no verified subscribers", workspace_id)
+        return {"dispatched": 0, "skipped_dedup": 0, "skipped_no_subs": 1,
+                "skipped_empty": 0, "errors": 0}
+
+    topic_arn = subs[0].get("topic_arn", "")
+    if not topic_arn:
+        logger.warning("General EOL digest ws=%s — no topic_arn", workspace_id)
+        return {"dispatched": 0, "skipped_dedup": 0, "skipped_no_subs": 1,
+                "skipped_empty": 0, "errors": 0}
+
+    # 2. Load General EOL data (already recomputed with fresh daysToEol)
+    cache_result = _general_eol.get_cached_only(storage)
+    if cache_result.is_empty:
+        logger.info("General EOL digest ws=%s — cache empty, skipping", workspace_id)
+        return {"dispatched": 0, "skipped_dedup": 0, "skipped_no_subs": 0,
+                "skipped_empty": 1, "errors": 0}
+
+    # 3. Filter EOL and EXPIRING_SOON
+    eol_records = [r for r in cache_result.records if r.get("status") == "EOL"]
+    exp_records = [r for r in cache_result.records if r.get("status") == "EXPIRING_SOON"]
+
+    if not eol_records and not exp_records:
+        logger.info("General EOL digest ws=%s — no EOL/EXPIRING resources", workspace_id)
+        return {"dispatched": 0, "skipped_dedup": 0, "skipped_no_subs": 0,
+                "skipped_empty": 1, "errors": 0}
+
+    # 4. Dedup — build content hash from all resource IDs + today's date
+    from datetime import date
+    resource_ids = sorted(
+        [r.get("id", "") for r in eol_records + exp_records]
+    )
+    content_hash = hashlib.sha256(
+        f"{date.today().isoformat()}:{','.join(resource_ids)}".encode()
+    ).hexdigest()[:16]
+
+    dedup_key = f"general-eol-digest-{content_hash}"
+    if storage.is_duplicate_sns_alert(workspace_id, dedup_key, "DIGEST", COOLDOWN_HOURS):
+        logger.info("General EOL digest ws=%s — dedup active (hash=%s)", workspace_id, content_hash)
+        return {"dispatched": 0, "skipped_dedup": 1, "skipped_no_subs": 0,
+                "skipped_empty": 0, "errors": 0}
+
+    # 5. Build digest email
+    subject, html_body, text_body = _build_general_eol_digest_html(
+        eol_records, exp_records, workspace_name or workspace_id
+    )
+
+    if dry_run:
+        logger.info("[DRY RUN] Would send General EOL digest ws=%s eol=%d exp=%d",
+                    workspace_id, len(eol_records), len(exp_records))
+        return {"dispatched": 1, "skipped_dedup": 0, "skipped_no_subs": 0,
+                "skipped_empty": 0, "errors": 0}
+
+    # 6. Publish
+    try:
+        import sns_service
+        message_id = sns_service.publish_alert(topic_arn, subject, html_body, text_body)
+
+        # Record history for dedup
+        record = make_notification_history(
+            workspace_id,
+            {"resource_id": dedup_key, "service_type": "General EOL Digest",
+             "version": f"{len(eol_records)} EOL, {len(exp_records)} Expiring",
+             "severity": "DIGEST"},
+            "all_subscribers", "SENT", message_id
+        )
+        storage.save_sns_notification_history(record)
+
+        logger.info("General EOL digest sent ws=%s eol=%d exp=%d msgId=%s",
+                    workspace_id, len(eol_records), len(exp_records), message_id)
+        return {"dispatched": 1, "skipped_dedup": 0, "skipped_no_subs": 0,
+                "skipped_empty": 0, "errors": 0}
+
+    except Exception as exc:
+        logger.error("General EOL digest publish failed ws=%s: %s", workspace_id, exc)
+        return {"dispatched": 0, "skipped_dedup": 0, "skipped_no_subs": 0,
+                "skipped_empty": 0, "errors": 1}
+

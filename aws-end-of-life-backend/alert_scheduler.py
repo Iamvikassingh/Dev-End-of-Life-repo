@@ -49,6 +49,7 @@ def _run_dispatch_cycle():
             if not ws_id:
                 continue
             try:
+                # Account scan alerts (per-resource)
                 result = sns_alert_handler.evaluate_and_dispatch(ws_id, ws_name)
                 total_dispatched += result.get("dispatched", 0)
                 logger.info(
@@ -56,6 +57,15 @@ def _run_dispatch_cycle():
                     ws_id, result.get("dispatched", 0),
                     result.get("skipped_dedup", 0), result.get("errors", 0)
                 )
+
+                # General EOL digest (single grouped email)
+                digest = sns_alert_handler.dispatch_general_eol_digest(ws_id, ws_name)
+                total_dispatched += digest.get("dispatched", 0)
+                logger.info(
+                    "SNS scheduler ws=%s general_eol_digest dispatched=%d dedup=%d",
+                    ws_id, digest.get("dispatched", 0), digest.get("skipped_dedup", 0)
+                )
+
             except Exception as exc:
                 logger.error("SNS scheduler error for workspace %s: %s", ws_id, exc)
 

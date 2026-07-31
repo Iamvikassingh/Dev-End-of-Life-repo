@@ -502,6 +502,46 @@ class CacheResult:
         self.is_empty     = is_empty
 
 
+def _recompute_days(records: list[dict]) -> list[dict]:
+    """Recalculate daysToEol and status for every record relative to today.
+
+    The cache stores these values at fetch time, so they go stale
+    as days pass. This ensures the frontend always sees accurate numbers.
+    """
+    from lifecycle.classifier import classify as _classify_unified
+
+    today = date.today()
+    for rec in records:
+        eol_date_str = rec.get("eolDate") or rec.get("eol_date")
+        support_str  = rec.get("supportEndDate")
+        is_eoes      = bool(rec.get("is_eoes") or rec.get("isEoes"))
+
+        if not eol_date_str:
+            continue
+
+        try:
+            status, primary_date, days = _classify_unified(
+                eol_date_str, support_str, is_eoes, WARN_DAYS,
+            )
+            rec["daysToEol"] = days
+            rec["status"]    = status
+            if primary_date:
+                rec["eolDate"] = primary_date
+        except Exception:
+            # Fallback: simple date diff if classifier fails
+            try:
+                eol_dt = date.fromisoformat(str(eol_date_str))
+                rec["daysToEol"] = (eol_dt - today).days
+                if rec["daysToEol"] < 0:
+                    rec["status"] = "EOL"
+                elif rec["daysToEol"] <= WARN_DAYS:
+                    rec["status"] = "EXPIRING_SOON"
+            except (ValueError, TypeError):
+                pass
+
+    return records
+
+
 def get_cached_only(storage) -> CacheResult:
     """
     Read from cache and return immediately — NO external network call.
@@ -520,7 +560,7 @@ def get_cached_only(storage) -> CacheResult:
                     int((datetime.utcnow() - t0).total_seconds() * 1000))
         return CacheResult(records=[], refreshed_at="", is_stale=False, is_empty=True)
 
-    records      = cached["records"]
+    records      = _recompute_days(cached["records"])
     refreshed_at = cached.get("refreshed_at", "")
     expires_at   = cached.get("expires_at", "")
     is_stale     = bool(expires_at and datetime.utcnow().isoformat() >= expires_at)
